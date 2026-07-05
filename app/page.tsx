@@ -8,7 +8,7 @@ export default function Home() {
         <span className="hero-badge">An illustrated field guide</span>
         <h1>Collect the birds around you.</h1>
         <p className="sub">
-          Feather Bound turns birdwatching into a living collection. Spot a bird, watch it
+          FeatherBound turns birdwatching into a living collection. Spot a bird, watch it
           bloom into an illustrated field-guide card, and fill your dex one species at a time.
         </p>
         <div className="cta-row">
@@ -27,7 +27,7 @@ export default function Home() {
           <a className="cta ghost" href="#prints">Shop the prints</a>
         </div>
         <div className="hero-art">
-          <img src="/hero-icon.png" alt="Feather Bound field-guide robin" />
+          <img src="/hero-icon.png" alt="FeatherBound field-guide robin" />
         </div>
       </section>
 

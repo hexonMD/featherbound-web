@@ -1,4 +1,4 @@
-// Feather Bound marketplace data model.
+// FeatherBound marketplace data model.
 //
 // A bird species can have MANY artworks (different artists may each submit their own take
 // on the same bird). Each artwork is by one artist and is sold as a print via Prodigi.
@@ -32,7 +32,7 @@ export const HOUSE = "house";
 export const artists: Artist[] = [
   {
     slug: HOUSE,
-    name: "Feather Bound Studio",
+    name: "FeatherBound Studio",
     bio: "The house field-guide plates that ship with the app.",
     location: "Brentwood Bay, BC",
   },

@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Feather Bound — Collect the birds around you",
+  title: "FeatherBound — Collect the birds around you",
   description:
     "An illustrated field guide that turns birdwatching into a collection. Spot birds, reveal field-guide cards, and order fine-art prints of your favourites.",
   metadataBase: new URL("https://featherbound.app"),
   openGraph: {
-    title: "Feather Bound",
+    title: "FeatherBound",
     description: "Collect the birds around you. An illustrated birding game.",
     type: "website",
   },
@@ -20,8 +20,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header>
           <nav className="nav">
             <a className="brand" href="/">
-              <img src="/robin.png" alt="Feather Bound" />
-              Feather Bound
+              <img src="/robin.png" alt="FeatherBound" />
+              FeatherBound
             </a>
             <div className="navlinks">
               <a href="/#features">The app</a>
@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <footer className="footer">
           <div className="wrap">
-            Feather Bound · an illustrated field guide · Brentwood Bay, BC
+            FeatherBound · an illustrated field guide · Brentwood Bay, BC
             <br />
             Prints fulfilled by Prodigi. Artwork © its illustrators.
           </div>
