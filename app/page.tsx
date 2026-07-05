@@ -41,7 +41,7 @@ export default function Home() {
           </p>
           <div className="grid3 shots">
             <div className="card shot">
-              <div className="phone"><img src="/screen-spot.png" alt="Spotting a bird by photo or birdsong in FeatherBound" /></div>
+              <div className="phone"><img src="/screen-match.png" alt="FeatherBound naming a photographed bird — a 97% match to a Steller's Jay" /></div>
               <h3>Spot &amp; reveal</h3>
               <p>Photo or birdsong — identified on-device, then revealed as an illustrated card with a little ceremony.</p>
             </div>
