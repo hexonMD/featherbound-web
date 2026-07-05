@@ -60,16 +60,16 @@ export default function Home() {
           </p>
           <div className="transition">
             <figure className="tcard">
-              <img src="/transition-photo.png" alt="A photo of a European robin" />
+              <img src="/transition-photo.png" alt="A photo of a house sparrow" />
               <figcaption>Your photo</figcaption>
             </figure>
             <div className="tarrow" aria-hidden="true">&rarr;</div>
             <figure className="tcard">
-              <img src="/transition-plate.png" alt="The same robin as a hand-illustrated field-guide plate" />
+              <img src="/transition-plate.png" alt="The same house sparrow as a hand-illustrated field-guide plate" />
               <figcaption>Your card</figcaption>
             </figure>
           </div>
-          <p className="tcredit">Photo by codrin_bucur via iNaturalist (CC BY)</p>
+          <p className="tcredit">Photo via iNaturalist (public domain)</p>
         </div>
       </section>
 
