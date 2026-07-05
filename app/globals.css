@@ -69,7 +69,7 @@ img { max-width: 100%; display: block; }
 
 .badge { display: inline-flex; transition: transform .12s ease; }
 .badge:hover { transform: translateY(-1px); }
-.badge svg { display: block; border-radius: 10px; }
+.badge svg, .badge img { display: block; border-radius: 10px; height: 58px; width: auto; }
 
 /* section */
 .section { padding: 56px 0; }
