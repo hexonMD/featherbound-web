@@ -87,6 +87,18 @@ img { max-width: 100%; display: block; }
 .card p { color: var(--ink-2); font-size: 15px; line-height: 1.5; }
 .card .emoji { font-size: 26px; }
 
+/* app-screenshot feature cards */
+.card.shot { background: transparent; border: none; box-shadow: none; padding: 8px 6px; text-align: center; }
+.card.shot h3 { margin-top: 18px; }
+.card.shot p { max-width: 300px; margin: 0 auto; }
+.phone { max-width: 236px; margin: 0 auto; }
+.phone img {
+  width: 100%; display: block; border-radius: 30px;
+  border: 1px solid var(--hairline);
+  box-shadow: 0 20px 44px rgba(44, 39, 29, .26);
+}
+@media (max-width: 760px) { .phone { max-width: 264px; } }
+
 /* print grid */
 .prints { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 @media (max-width: 760px) { .prints { grid-template-columns: repeat(2, 1fr); } }

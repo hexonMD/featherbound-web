@@ -39,19 +39,19 @@ export default function Home() {
             Point your camera at a bird. On-device AI names it, and it reveals as a
             field-guide plate you keep forever.
           </p>
-          <div className="grid3">
-            <div className="card">
-              <div className="emoji">🔭</div>
+          <div className="grid3 shots">
+            <div className="card shot">
+              <div className="phone"><img src="/screen-spot.png" alt="Spotting a bird by photo or birdsong in FeatherBound" /></div>
               <h3>Spot &amp; reveal</h3>
               <p>Photo or birdsong — identified on-device, then revealed as an illustrated card with a little ceremony.</p>
             </div>
-            <div className="card">
-              <div className="emoji">📖</div>
+            <div className="card shot">
+              <div className="phone"><img src="/screen-dex.png" alt="The BirdDex — every species, greyed until you find it" /></div>
               <h3>Your BirdDex</h3>
-              <p>Every North-American species, greyed until you find it — then it turns to full colour. Rarity, range and season on every page.</p>
+              <p>Every species, greyed until you find it — then it turns to full colour. Rarity, range and season on every page.</p>
             </div>
-            <div className="card">
-              <div className="emoji">🪶</div>
+            <div className="card shot">
+              <div className="phone"><img src="/screen-badges.png" alt="Collectible badges and streaks in FeatherBound" /></div>
               <h3>Streaks &amp; badges</h3>
               <p>Daily quests, rare-bird alerts near you, and collectible badges for the birds you chase.</p>
             </div>
