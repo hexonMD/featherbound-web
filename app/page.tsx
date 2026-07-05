@@ -50,6 +50,29 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Photo -> illustration transition */}
+      <section className="section" id="transition">
+        <div className="wrap">
+          <h2>Spot it, keep it illustrated.</h2>
+          <p className="lead">
+            Point your camera at a bird — FeatherBound names it and turns your sighting into a
+            hand-illustrated field-guide plate you keep forever.
+          </p>
+          <div className="transition">
+            <figure className="tcard">
+              <img src="/transition-photo.png" alt="A photo of a European robin" />
+              <figcaption>Your photo</figcaption>
+            </figure>
+            <div className="tarrow" aria-hidden="true">&rarr;</div>
+            <figure className="tcard">
+              <img src="/transition-plate.png" alt="The same robin as a hand-illustrated field-guide plate" />
+              <figcaption>Your card</figcaption>
+            </figure>
+          </div>
+          <p className="tcredit">Photo by codrin_bucur via iNaturalist (CC BY)</p>
+        </div>
+      </section>
+
       {/* Prints */}
       <section className="section" id="prints">
         <div className="wrap">
