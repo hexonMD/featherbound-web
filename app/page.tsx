@@ -55,17 +55,17 @@ export default function Home() {
         <div className="wrap">
           <h2>Spot it, keep it illustrated.</h2>
           <p className="lead">
-            Point your camera at a bird — FeatherBound names it and turns your sighting into a
-            hand-illustrated field-guide plate you keep forever.
+            Point your camera at a bird — FeatherBound identifies it and adds its
+            hand-illustrated field-guide plate to your collection.
           </p>
           <div className="transition">
             <figure className="tcard">
-              <img src="/transition-photo.png" alt="A photo of a house sparrow" />
+              <img src="/transition-photo.png" alt="A photo of a blue jay" />
               <figcaption>Your photo</figcaption>
             </figure>
             <div className="tarrow" aria-hidden="true">&rarr;</div>
             <figure className="tcard">
-              <img src="/transition-plate.png" alt="The same house sparrow as a hand-illustrated field-guide plate" />
+              <img src="/transition-plate.png" alt="The same blue jay as a hand-illustrated field-guide plate" />
               <figcaption>Your card</figcaption>
             </figure>
           </div>
