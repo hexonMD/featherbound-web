@@ -17,11 +17,11 @@ export default function Home() {
               <rect width="120" height="40" rx="7" fill="#000" />
               <path
                 fill="#fff"
-                transform="translate(9.5,9) scale(1.15)"
+                transform="translate(11,8.5) scale(1.35)"
                 d="M11.7 8.6c-.01-1.36 1.11-2.01 1.16-2.05-.63-.92-1.62-1.05-1.97-1.06-.84-.09-1.63.49-2.05.49-.42 0-1.08-.48-1.77-.47-.91.01-1.75.53-2.22 1.35-.95 1.64-.24 4.07.68 5.4.45.65.99 1.38 1.69 1.36.68-.03.93-.44 1.75-.44.81 0 1.05.44 1.76.42.72-.01 1.18-.66 1.63-1.32.51-.75.72-1.48.73-1.51-.02-.01-1.4-.54-1.42-2.13zM10.36 4.55c.37-.45.62-1.08.55-1.7-.53.02-1.19.36-1.57.8-.34.4-.65 1.03-.57 1.63.6.05 1.21-.3 1.59-.73z"
               />
-              <text x="34" y="16" fill="#fff" fontFamily="Helvetica, Arial, sans-serif" fontSize="6.6">Download on the</text>
-              <text x="34" y="31" fill="#fff" fontFamily="Helvetica, Arial, sans-serif" fontSize="15" fontWeight="600">App Store</text>
+              <text x="41" y="16.5" fill="#fff" fontFamily="Helvetica, Arial, sans-serif" fontSize="7" letterSpacing="0.2">Download on the</text>
+              <text x="40.4" y="30.5" fill="#fff" fontFamily="Helvetica, Arial, sans-serif" fontSize="15.5" fontWeight="600" letterSpacing="-0.2">App Store</text>
             </svg>
           </a>
           <a className="cta ghost" href="#prints">Shop the prints</a>

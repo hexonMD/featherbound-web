@@ -32,7 +32,17 @@ img { max-width: 100%; display: block; }
 .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 22px; letter-spacing: .3px; }
 .brand img { width: 40px; height: 40px; border-radius: 9px; }
 .navlinks { display: flex; gap: 26px; font-size: 15px; color: var(--ink-2); }
+.navlinks a { white-space: nowrap; }
 .navlinks a:hover { color: var(--ink); }
+@media (max-width: 640px) {
+  .nav { padding: 14px 16px; gap: 10px; }
+  .brand { font-size: 17px; gap: 8px; letter-spacing: .2px; flex-shrink: 0; }
+  .brand img { width: 30px; height: 30px; }
+  .navlinks { gap: 15px; font-size: 13px; }
+}
+@media (max-width: 380px) {
+  .navlinks a[href="/#features"] { display: none; }
+}
 
 /* hero */
 .hero { text-align: center; padding: 56px 24px 40px; }
@@ -50,7 +60,7 @@ img { max-width: 100%; display: block; }
 }
 .cta:hover { transform: translateY(-1px); }
 .cta.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--hairline); box-shadow: none; }
-.cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.cta-row { display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap; }
 
 .hero-art { margin: 40px auto 0; max-width: 320px; }
 /* PNG already has transparent rounded corners — use drop-shadow so the shadow follows the
