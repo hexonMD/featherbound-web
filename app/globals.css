@@ -53,7 +53,13 @@ img { max-width: 100%; display: block; }
 .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
 .hero-art { margin: 40px auto 0; max-width: 320px; }
-.hero-art img { border-radius: 28px; box-shadow: 0 18px 50px rgba(44,39,29,.28); }
+/* PNG already has transparent rounded corners — use drop-shadow so the shadow follows the
+   rounded silhouette (box-shadow would draw a square halo behind the transparent corners). */
+.hero-art img { filter: drop-shadow(0 16px 34px rgba(44,39,29,.30)); }
+
+.badge { display: inline-flex; transition: transform .12s ease; }
+.badge:hover { transform: translateY(-1px); }
+.badge svg { display: block; border-radius: 10px; }
 
 /* section */
 .section { padding: 56px 0; }
@@ -93,3 +99,7 @@ img { max-width: 100%; display: block; }
 .detail-head .plate { flex: 1 1 320px; background: var(--surface-hi); border: 1px solid var(--hairline); border-radius: 20px; padding: 24px; }
 .detail-head .info { flex: 1 1 300px; }
 .pill { display: inline-block; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-2); border: 1px solid var(--hairline); border-radius: 999px; padding: 5px 12px; margin-bottom: 14px; }
+
+.artist-cta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+@media (max-width: 760px) { .artist-cta { grid-template-columns: 1fr; } }
+.artist-cta .card h3 { color: var(--accent); }
