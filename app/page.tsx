@@ -107,7 +107,21 @@ export default function Home() {
               <p>You earn from every print sold, with your own artist profile and portfolio on the site.</p>
             </div>
           </div>
-          <div style={{ textAlign: "center", marginTop: 30 }}>
+          <div style={{ marginTop: 40 }}>
+            <h3 style={{ textAlign: "center", fontSize: 24, marginBottom: 8 }}>What we look for</h3>
+            <p style={{ textAlign: "center", color: "var(--ink-2)", maxWidth: 620, margin: "0 auto 24px", lineHeight: 1.5 }}>
+              Art that&rsquo;s a joy in the app and holds up as a print. In short:
+            </p>
+            <ul className="look-for">
+              <li><b>True to the bird.</b> Field-guide accurate — the right plumage, proportions and the key marks a birder identifies it by.</li>
+              <li><b>One bird, clean plate.</b> A single species on a transparent or simple background, so it reads as a guide plate and drops cleanly onto a tee or mug.</li>
+              <li><b>Print-ready.</b> High resolution — 300 DPI, longest edge at least 3000px — as a PNG or layered file.</li>
+              <li><b>Your own work.</b> Original art you hold the rights to license. A distinctive style is a plus; personality beats photorealism.</li>
+              <li><b>Species that fill gaps.</b> Common North American and European birds help most first — that&rsquo;s most of what players are catching.</li>
+              <li><b>A range, if you can.</b> Male/female or seasonal plumages of the same species are especially welcome.</li>
+            </ul>
+          </div>
+          <div style={{ textAlign: "center", marginTop: 34 }}>
             <a className="cta" href="mailto:artists@featherbound.app?subject=Feather%20Bound%20artist%20submission">
               Submit your art
             </a>

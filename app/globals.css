@@ -125,3 +125,9 @@ img { max-width: 100%; display: block; }
 .artist-cta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 @media (max-width: 760px) { .artist-cta { grid-template-columns: 1fr; } }
 .artist-cta .card h3 { color: var(--accent); }
+
+.look-for { list-style: none; max-width: 780px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 26px; }
+.look-for li { position: relative; padding-left: 26px; color: var(--ink-2); line-height: 1.5; font-size: 15px; }
+.look-for li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--accent); font-weight: 700; }
+.look-for li b { color: var(--ink); }
+@media (max-width: 640px) { .look-for { grid-template-columns: 1fr; } }
