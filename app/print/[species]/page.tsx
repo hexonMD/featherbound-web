@@ -1,4 +1,5 @@
 import { artworksForSpecies, artistBySlug, HOUSE } from "@/lib/data";
+import ProductPicker from "@/components/ProductPicker";
 
 export default async function PrintPage({ params }: { params: Promise<{ species: string }> }) {
   const { species } = await params;
@@ -41,8 +42,8 @@ export default async function PrintPage({ params }: { params: Promise<{ species:
       <p style={{ fontStyle: "italic", color: "var(--ink-2)", marginTop: 4 }}>{sci}</p>
       <p style={{ color: "var(--ink-2)", maxWidth: 620, marginTop: 14, lineHeight: 1.5 }}>
         {arts.length > 1
-          ? `${arts.length} artists have illustrated this bird. Choose your favourite — each is printed to order.`
-          : "Printed to order on museum-quality fine-art paper, shipped worldwide."}
+          ? `${arts.length} artists have illustrated this bird. Choose your favourite — each is made to order on prints, tees, mugs and totes.`
+          : "Made to order on fine-art prints, tees, mugs and totes, shipped worldwide."}
       </p>
 
       <div className="prints" style={{ marginTop: 28, marginBottom: 60 }}>
@@ -61,13 +62,7 @@ export default async function PrintPage({ params }: { params: Promise<{ species:
                     by <a href={`/artists/${artist.slug}`} style={{ color: "var(--accent)", fontWeight: 700 }}>{artist.name}</a>
                   </div>
                 )}
-                <div className="price">${a.priceUsd}</div>
-                <form action="/api/order" method="post" style={{ marginTop: 12 }}>
-                  <input type="hidden" name="artworkId" value={a.id} />
-                  <button className="cta" style={{ width: "100%", justifyContent: "center", fontSize: 15, padding: "12px 18px" }}>
-                    Order print
-                  </button>
-                </form>
+                <ProductPicker artworkId={a.id} printPriceUsd={a.priceUsd} />
               </div>
             </div>
           );

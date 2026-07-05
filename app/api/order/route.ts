@@ -1,21 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { artworks } from "@/lib/data";
+import { productById } from "@/lib/products";
 
-// Server-side print ordering. The Prodigi key lives ONLY in env (PRODIGI_API_KEY) and is
-// never exposed to the browser. Full flow (to wire next): Stripe Checkout for payment →
-// webhook → createProdigiOrder() (see lib/prodigi.ts). Payment isn't connected yet, so
-// this returns a friendly placeholder.
+// Server-side ordering for any product (print, tee, mug, tote). The Prodigi key lives ONLY
+// in env (PRODIGI_API_KEY) and is never exposed to the browser. Prodigi is product-agnostic:
+// createProdigiOrder() (lib/prodigi.ts) takes the product SKU plus the bird image as the
+// print asset, so the same flow fulfils apparel and homeware as well as prints. Full flow
+// (to wire next): Stripe Checkout for payment → webhook → createProdigiOrder({ prodigiSku:
+// product.prodigiSku, image: art.image }, recipient). Payment isn't connected yet, so this
+// returns a friendly placeholder.
 export async function POST(req: NextRequest) {
   const form = await req.formData();
   const id = String(form.get("artworkId") ?? "");
+  const productType = String(form.get("productType") ?? "print");
   const art = artworks.find((a) => a.id === id);
   if (!art) return NextResponse.json({ error: "unknown artwork" }, { status: 404 });
+  const product = productById(productType) ?? productById("print")!;
 
   return new NextResponse(
     `<!doctype html><html><body style="font-family:Georgia,serif;background:#f0e4cb;color:#2c271d;text-align:center;padding:90px 24px">
        <h1 style="font-size:34px">Checkout coming soon</h1>
        <p style="color:#6b6150;max-width:460px;margin:14px auto 0;line-height:1.5">
-         Print ordering for <b>${art.speciesCommon}</b> is being wired up (payment and fulfilment). It will be live shortly.
+         ${product.label} ordering for <b>${art.speciesCommon}</b> is being wired up (payment and fulfilment). It will be live shortly.
        </p>
        <p style="margin-top:26px"><a href="/#prints" style="color:#3f6d5a;font-weight:700">Back to prints</a></p>
      </body></html>`,
