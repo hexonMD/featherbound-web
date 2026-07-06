@@ -56,6 +56,17 @@ export function printSizeById(id: string): PrintSize {
   return PRINT_SIZES.find((s) => s.id === id) ?? PRINT_SIZES.find((s) => s.id === DEFAULT_PRINT_SIZE)!;
 }
 
+// ── Collection collage ("field guide") ───────────────────────────────────────
+// A personalized print of the birds a user collected, laid out as a field-guide page.
+// Uses the same portrait FAP print SKUs as single-bird plates (it IS a portrait plate),
+// so a collage size resolves through printSizeById. Priced a touch above a single plate —
+// it's a composed, one-off print. Base = 16×24; scales by the same size mult.
+export const COLLAGE_BASE_USD = 44;
+export const DEFAULT_COLLAGE_SIZE = "16x24";
+// One-sheet legibility ceiling: 5 cols × 6 rows. Past this, names get too small to read.
+export const MAX_COLLAGE_BIRDS = 30;
+export const MIN_COLLAGE_BIRDS = 5;
+
 export type ShirtSize = { id: string; label: string };
 export const SHIRT_SIZES: ShirtSize[] = [
   { id: "s", label: "S" },

@@ -84,7 +84,7 @@ async function replicateUpscale(imageUrl: string, token: string): Promise<string
   return typeof pred.output === "string" ? pred.output : pred.output?.[0] ?? null;
 }
 
-async function putToR2(key: string, bytes: Uint8Array | ArrayBuffer) {
+export async function putToR2(key: string, bytes: Uint8Array | ArrayBuffer) {
   const client = new AwsClient({
     accessKeyId: process.env.R2_ACCESS_KEY_ID!,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
