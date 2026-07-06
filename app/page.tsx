@@ -65,7 +65,7 @@ export default function Home() {
             </figure>
             <div className="tarrow" aria-hidden="true">&rarr;</div>
             <figure className="tcard">
-              <img src="/transition-plate.png" alt="The same blue jay as a hand-illustrated field-guide plate" />
+              <img src="/transition-plate.png?v=3" alt="The same blue jay as a hand-illustrated field-guide plate" />
               <figcaption>Your card</figcaption>
             </figure>
           </div>
