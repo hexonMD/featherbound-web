@@ -83,17 +83,22 @@ export default function Home() {
           </p>
           <div className="prints">
             {featured.map((a) => (
-              <a key={a.id} className="print" href={`/print/${encodeURIComponent(a.speciesSci)}`}>
+              <a key={a.id} className="print" href={`/print/${a.slug}`}>
                 <div className="frame">
-                  <img src={a.image} alt={a.speciesCommon} />
+                  <img src={a.image} alt={a.speciesCommon} loading="lazy" />
                 </div>
                 <div className="meta">
                   <div className="name">{a.speciesCommon}</div>
                   <div className="sci">{a.speciesSci}</div>
-                  <div className="price">${a.priceUsd}</div>
+                  <div className="price">from ${a.priceUsd}</div>
                 </div>
               </a>
             ))}
+          </div>
+          <div style={{ textAlign: "center", marginTop: 34 }}>
+            <a className="cta" href="/store" style={{ display: "inline-flex" }}>
+              Shop all 1,682 birds →
+            </a>
           </div>
         </div>
       </section>

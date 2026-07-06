@@ -3,8 +3,11 @@
 // A bird species can have MANY artworks (different artists may each submit their own take
 // on the same bird). Each artwork is by one artist and is sold as a print via Prodigi.
 // The default plates shipped in the app are "house" pieces (no external artist yet) — those
-// show no artist attribution in-app, per product rules. Seeded here now; moves to Postgres
-// once the marketplace opens to real illustrators.
+// show no artist attribution in-app, per product rules. The full 1,682-bird catalogue is
+// generated from the flock-plates set (lib/birds.ts); real illustrators' artworks land in
+// Postgres once the marketplace opens.
+
+import { BIRDS, plateUrl, type Bird } from "./birds";
 
 export type Artist = {
   slug: string;
@@ -16,18 +19,20 @@ export type Artist = {
 };
 
 export type Artwork = {
-  id: string;
-  speciesSci: string;   // scientific name — the key shared with the app's dex
+  id: string;           // = plate slug (unique, URL-safe)
+  speciesSci: string;   // scientific name — the key shared with the app's dex ("" for a few)
   speciesCommon: string;
+  slug: string;
   artistSlug: string | null;   // null = house / AI plate, no attribution
-  image: string;        // print-resolution art
+  image: string;        // print asset (jsDelivr CDN of the flock-plates repo)
   title: string;
-  prodigiSku: string;   // Prodigi product SKU for fulfilment
-  priceUsd: number;
+  prodigiSku: string;   // default print SKU; size ladder in lib/products.ts overrides per size
+  priceUsd: number;     // base (16×24) price; size multipliers scale it
 };
 
 // House artist marker — used for the app's own plates until real artists submit.
 export const HOUSE = "house";
+const BASE_PRINT_PRICE = 34;
 
 export const artists: Artist[] = [
   {
@@ -39,41 +44,26 @@ export const artists: Artist[] = [
   // Real illustrators land here as the marketplace opens.
 ];
 
-export const artworks: Artwork[] = [
-  {
-    id: "robin-house",
-    speciesSci: "Turdus migratorius",
-    speciesCommon: "American Robin",
-    artistSlug: null,
-    image: "/plate-robin.png",
-    title: "American Robin — Field Plate",
-    prodigiSku: "GLOBAL-FAP-16X24",
-    priceUsd: 34,
-  },
-  {
-    id: "chickadee-house",
-    speciesSci: "Poecile atricapillus",
-    speciesCommon: "Black-capped Chickadee",
-    artistSlug: null,
-    image: "/plate-chickadee.png",
-    title: "Black-capped Chickadee — Field Plate",
-    prodigiSku: "GLOBAL-FAP-16X24",
-    priceUsd: 34,
-  },
-  {
-    id: "goldfinch-house",
-    speciesSci: "Spinus tristis",
-    speciesCommon: "American Goldfinch",
-    artistSlug: null,
-    image: "/plate-goldfinch.png",
-    title: "American Goldfinch — Field Plate",
-    prodigiSku: "GLOBAL-FAP-16X24",
-    priceUsd: 34,
-  },
-];
+// The whole dex, as house-plate artworks — one per bird with a flock-plate (1,682).
+export const artworks: Artwork[] = BIRDS.map((b: Bird) => ({
+  id: b.slug,
+  speciesSci: b.sci,
+  speciesCommon: b.common,
+  slug: b.slug,
+  artistSlug: null,
+  image: plateUrl(b.slug),
+  title: `${b.common} — Field Plate`,
+  prodigiSku: "GLOBAL-FAP-16X24",
+  priceUsd: BASE_PRINT_PRICE,
+}));
+
+const bySlug = new Map(artworks.map((a) => [a.slug, a]));
+export function artworkBySlug(slug: string): Artwork | undefined {
+  return bySlug.get(slug);
+}
 
 export function artworksForSpecies(sci: string): Artwork[] {
-  return artworks.filter((a) => a.speciesSci.toLowerCase() === sci.toLowerCase());
+  return sci ? artworks.filter((a) => a.speciesSci.toLowerCase() === sci.toLowerCase()) : [];
 }
 
 export function artworksByArtist(slug: string): Artwork[] {
@@ -84,5 +74,11 @@ export function artistBySlug(slug: string): Artist | undefined {
   return artists.find((a) => a.slug === slug);
 }
 
-// A few showcase species for the landing/store grid.
-export const featured = artworks;
+// A curated handful of recognizable birds for the landing hero; the store shows all of them.
+const FEATURED_SLUGS = [
+  "american-robin", "northern-cardinal", "blue-jay", "american-goldfinch",
+  "black-capped-chickadee", "baltimore-oriole", "eastern-bluebird", "cedar-waxwing",
+  "european-robin", "barn-owl", "belted-kingfisher", "painted-bunting",
+];
+export const featured: Artwork[] =
+  FEATURED_SLUGS.map((s) => bySlug.get(s)).filter((a): a is Artwork => !!a);

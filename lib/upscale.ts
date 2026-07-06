@@ -15,7 +15,7 @@ export function plateSlug(commonName: string): string {
 }
 
 export async function printMasterUrl(imagePath: string, slug: string): Promise<string> {
-  const original = `${SITE}${imagePath}`;
+  const original = /^https?:\/\//.test(imagePath) ? imagePath : `${SITE}${imagePath}`;
   const token = process.env.REPLICATE_API_TOKEN;
   const r2Base = process.env.R2_PUBLIC_BASE;
   if (!token || !r2Base || !process.env.R2_ACCESS_KEY_ID) return original; // not wired → safe fallback

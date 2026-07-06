@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
           product_data: {
             name,
             description: product.blurb,
-            images: [`${SITE}${art.image}`],
+            images: [/^https?:\/\//.test(art.image) ? art.image : `${SITE}${art.image}`],
           },
         },
       },

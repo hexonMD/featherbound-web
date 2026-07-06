@@ -19,7 +19,9 @@ export async function createProdigiOrder(
 ) {
   const key = process.env.PRODIGI_API_KEY;
   if (!key) throw new Error("PRODIGI_API_KEY not set");
-  const assetUrl = art.assetUrl ?? `https://featherbound.app${art.image}`;
+  const assetUrl =
+    art.assetUrl ??
+    (/^https?:\/\//.test(art.image) ? art.image : `https://featherbound.app${art.image}`);
   const item: Record<string, unknown> = {
     merchantReference: reference,
     sku: art.prodigiSku,
