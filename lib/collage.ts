@@ -26,6 +26,10 @@ export type CollageBird = {
   image: Buffer | Uint8Array;
 };
 
+// Which per-bird labels to print. The user picks these in the app.
+export type CollageShow = { name: boolean; date: boolean; area: boolean };
+export const DEFAULT_SHOW: CollageShow = { name: true, date: true, area: true };
+
 function cols(n: number): number {
   return n <= 6 ? 2 : n <= 12 ? 3 : n <= 24 ? 4 : 5;
 }
@@ -34,7 +38,8 @@ export async function composeCollage(
   birds: CollageBird[],
   title: string,
   W: number,
-  H: number
+  H: number,
+  show: CollageShow = DEFAULT_SHOW
 ): Promise<Buffer> {
   fonts();
   const S = W / 1600;
@@ -94,15 +99,20 @@ export async function composeCollage(
     ctx.drawImage(img, cx - iw / 2, imgBottom - ih, iw, ih);
 
     let ty = cy + cellH * 0.64;
-    ctx.fillStyle = INK;
-    ctx.font = `bold ${nameSize}px Lora`;
-    ctx.fillText(birds[i].name, cx, ty, cellW * 0.94);
-    ty += nameSize * 1.3;
-    ctx.fillStyle = MUT;
-    ctx.font = `italic ${dateSize}px "Lora Italic"`;
-    ctx.fillText(birds[i].date, cx, ty, cellW * 0.94);
-    if (birds[i].area) {
+    if (show.name && birds[i].name) {
+      ctx.fillStyle = INK;
+      ctx.font = `bold ${nameSize}px Lora`;
+      ctx.fillText(birds[i].name, cx, ty, cellW * 0.94);
+      ty += nameSize * 1.3;
+    }
+    if (show.date && birds[i].date) {
+      ctx.fillStyle = MUT;
+      ctx.font = `italic ${dateSize}px "Lora Italic"`;
+      ctx.fillText(birds[i].date, cx, ty, cellW * 0.94);
       ty += dateSize * 1.3;
+    }
+    if (show.area && birds[i].area) {
+      ctx.fillStyle = MUT;
       ctx.font = `${dateSize}px Lora`;
       ctx.fillText(birds[i].area!, cx, ty, cellW * 0.94);
     }
@@ -119,7 +129,7 @@ export async function composeCollage(
 // One entry per selected bird. `slug` (resolved from the app's sci/name) picks the plate off
 // the flock-plates CDN; the rest are what the user recorded (common name, seen date, area).
 export type CollageSpecBird = { slug: string; name: string; date: string; area?: string };
-export type CollageSpec = { birds: CollageSpecBird[]; title: string; sizeId: string };
+export type CollageSpec = { birds: CollageSpecBird[]; title: string; sizeId: string; show: CollageShow };
 
 // Validate + normalize an untrusted client spec (the app POSTs this). Returns a clean spec
 // or an error string. Caps the bird count at MAX (one-sheet legibility) and requires MIN.
@@ -151,7 +161,11 @@ export function parseCollageSpec(raw: unknown): { spec?: CollageSpec; error?: st
   const title =
     (typeof body.title === "string" && body.title.trim() ? body.title.trim() : "My Field Guide").slice(0, 60);
   const sizeId = printSizeById(typeof body.sizeId === "string" ? body.sizeId : "").id;
-  return { spec: { birds, title, sizeId } };
+  // Per-field visibility; default everything on if the client omits it.
+  const s = (body.show ?? {}) as Record<string, unknown>;
+  const flag = (v: unknown) => v !== false; // only an explicit false hides a field
+  const show: CollageShow = { name: flag(s.name), date: flag(s.date), area: flag(s.area) };
+  return { spec: { birds, title, sizeId, show } };
 }
 
 // Preview render: same layout, scaled to a screen-friendly width (fast, small payload).
@@ -166,7 +180,7 @@ export async function composeCollagePreview(spec: CollageSpec, previewW = 1000):
       return { name: b.name, date: b.date, area: b.area, image: Buffer.from(await res.arrayBuffer()) };
     })
   );
-  return composeCollage(birds, spec.title, pw, ph);
+  return composeCollage(birds, spec.title, pw, ph, spec.show);
 }
 
 // Deterministic key so the same order composes once (preview + checkout + re-order agree).
@@ -174,6 +188,7 @@ function specHash(spec: CollageSpec): string {
   const s = JSON.stringify([
     spec.sizeId,
     spec.title,
+    spec.show,
     spec.birds.map((b) => [b.slug, b.name, b.date, b.area ?? ""]),
   ]);
   let h = 0x811c9dc5;
@@ -199,7 +214,7 @@ export async function composeCollageFromSpec(spec: CollageSpec): Promise<Buffer>
       };
     })
   );
-  return composeCollage(birds, spec.title, w, h);
+  return composeCollage(birds, spec.title, w, h, spec.show);
 }
 
 // Compose + upload to R2, returning the public print-asset URL. Cached by spec hash so a
