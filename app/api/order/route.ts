@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { artworks } from "@/lib/data";
-import { productById } from "@/lib/products";
+import { productById, printSizeById, SHIRT_SIZES, sizesFor } from "@/lib/products";
 
 // Print ordering — real Stripe Checkout. The secret key is server-side only (env). Flow:
 // this creates a hosted Checkout Session (collects payment + shipping address) and redirects
@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
   const form = await req.formData();
   const artworkId = String(form.get("artworkId") ?? "");
   const productType = String(form.get("productType") ?? "print");
+  const sizeId = String(form.get("size") ?? "");
   const art = artworks.find((a) => a.id === artworkId);
   const product = productById(productType);
   if (!art || !product) return NextResponse.json({ error: "unknown item" }, { status: 404 });
@@ -30,10 +31,27 @@ export async function POST(req: NextRequest) {
   // we can't fulfil means a refund. The picker already hides these; this guards direct POSTs.
   if (!product.available) return NextResponse.json({ error: "product unavailable" }, { status: 409 });
 
-  // The fine-art print uses the artwork's own price + SKU; other products use the catalogue.
-  const priceUsd = productType === "print" ? art.priceUsd : product.priceUsd;
-  const prodigiSku = productType === "print" ? art.prodigiSku : product.prodigiSku;
+  // Resolve price + SKU + Prodigi attributes for the chosen size.
+  //   • Print: size is a different SKU; price scales off the artwork's base price.
+  //   • Shirt: same SKU + a size (and colour) attribute; must have a valid size.
+  //   • Mug/tote: no size.
+  let priceUsd = productType === "print" ? art.priceUsd : product.priceUsd;
+  let prodigiSku = productType === "print" ? art.prodigiSku : product.prodigiSku;
+  let sizeLabel = "";
+  if (productType === "print") {
+    const size = printSizeById(sizeId);
+    prodigiSku = size.sku;
+    priceUsd = Math.round(art.priceUsd * size.mult);
+    sizeLabel = size.label;
+  } else if (productType === "shirt") {
+    const size = SHIRT_SIZES.find((s) => s.id === sizeId);
+    if (!size) return NextResponse.json({ error: "pick a shirt size" }, { status: 400 });
+    sizeLabel = size.label;
+  } else if (sizesFor(productType).length && !sizeId) {
+    return NextResponse.json({ error: "pick a size" }, { status: 400 });
+  }
 
+  const name = `${art.speciesCommon} — ${product.label}${sizeLabel ? ` (${sizeLabel})` : ""}`;
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     line_items: [
@@ -43,7 +61,7 @@ export async function POST(req: NextRequest) {
           currency: "usd",
           unit_amount: Math.round(priceUsd * 100),
           product_data: {
-            name: `${art.speciesCommon} — ${product.label}`,
+            name,
             description: product.blurb,
             images: [`${SITE}${art.image}`],
           },
@@ -54,8 +72,8 @@ export async function POST(req: NextRequest) {
     phone_number_collection: { enabled: true },
     success_url: `${SITE}/print/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${SITE}/print/${encodeURIComponent(art.speciesSci)}`,
-    // The webhook needs these to fulfil the right item after payment clears.
-    metadata: { artworkId: art.id, productType, prodigiSku },
+    // The webhook needs these to fulfil the right item + attributes after payment clears.
+    metadata: { artworkId: art.id, productType, prodigiSku, sizeId, sizeLabel },
   });
 
   if (!session.url) return NextResponse.json({ error: "could not start checkout" }, { status: 502 });

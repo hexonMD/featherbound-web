@@ -10,10 +10,21 @@
 export async function createProdigiOrder(
   art: { prodigiSku: string; image: string },
   recipient: Record<string, unknown>,
-  reference?: string
+  reference?: string,
+  // Prodigi item attributes — required for apparel (e.g. { size: "l", color: "white" }); the
+  // print pins its paper too. Omitted for products that don't need any.
+  attributes?: Record<string, string>
 ) {
   const key = process.env.PRODIGI_API_KEY;
   if (!key) throw new Error("PRODIGI_API_KEY not set");
+  const item: Record<string, unknown> = {
+    merchantReference: reference,
+    sku: art.prodigiSku,
+    copies: 1,
+    sizing: "fillPrintArea",
+    assets: [{ printArea: "default", url: `https://featherbound.app${art.image}` }],
+  };
+  if (attributes && Object.keys(attributes).length) item.attributes = attributes;
   const res = await fetch("https://api.prodigi.com/v4.0/Orders", {
     method: "POST",
     headers: { "X-API-Key": key, "content-type": "application/json" },
@@ -21,15 +32,7 @@ export async function createProdigiOrder(
       merchantReference: reference,
       shippingMethod: "Standard",
       recipient,
-      items: [
-        {
-          merchantReference: reference,
-          sku: art.prodigiSku,
-          copies: 1,
-          sizing: "fillPrintArea",
-          assets: [{ printArea: "default", url: `https://featherbound.app${art.image}` }],
-        },
-      ],
+      items: [item],
     }),
   });
   return res.json();

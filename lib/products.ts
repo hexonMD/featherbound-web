@@ -33,3 +33,42 @@ export const AVAILABLE_PRODUCTS: Product[] = PRODUCTS.filter((p) => p.available)
 export function productById(id: string): Product | undefined {
   return PRODUCTS.find((p) => p.id === id);
 }
+
+// ── Sizes ────────────────────────────────────────────────────────────────────
+// Prints and shirts need a size; mug + tote don't. They work differently in Prodigi:
+//   • Print size = a DIFFERENT SKU per size (GLOBAL-FAP-<size>), all verified 200 OK.
+//     Price scales off the artwork's own base price via `mult` (base = 16×24 = 1.0).
+//   • Shirt size = the SAME SKU + a `size` attribute on the order (plus a `color`), so we
+//     pass those through to Prodigi. Sizes are Prodigi's lowercase codes (s, m, l, …).
+
+export type PrintSize = { id: string; label: string; sku: string; mult: number };
+export const PRINT_SIZES: PrintSize[] = [
+  { id: "8x10",  label: '8 × 10"',  sku: "GLOBAL-FAP-8X10",  mult: 0.60 },
+  { id: "11x14", label: '11 × 14"', sku: "GLOBAL-FAP-11X14", mult: 0.78 },
+  { id: "12x16", label: '12 × 16"', sku: "GLOBAL-FAP-12X16", mult: 0.88 },
+  { id: "16x24", label: '16 × 24"', sku: "GLOBAL-FAP-16X24", mult: 1.0 },
+  { id: "18x24", label: '18 × 24"', sku: "GLOBAL-FAP-18X24", mult: 1.15 },
+  { id: "24x36", label: '24 × 36"', sku: "GLOBAL-FAP-24X36", mult: 1.55 },
+];
+export const DEFAULT_PRINT_SIZE = "16x24";
+export function printSizeById(id: string): PrintSize {
+  return PRINT_SIZES.find((s) => s.id === id) ?? PRINT_SIZES.find((s) => s.id === DEFAULT_PRINT_SIZE)!;
+}
+
+export type ShirtSize = { id: string; label: string };
+export const SHIRT_SIZES: ShirtSize[] = [
+  { id: "s", label: "S" },
+  { id: "m", label: "M" },
+  { id: "l", label: "L" },
+  { id: "xl", label: "XL" },
+  { id: "2xl", label: "2XL" },
+];
+// The bird art reads best on a light base; offer colour choice later if wanted.
+export const SHIRT_COLOR = "white";
+
+/// Sizes to show for a product (empty = no size picker). Print uses PRINT_SIZES; shirt SHIRT_SIZES.
+export function sizesFor(productId: string): { id: string; label: string }[] {
+  if (productId === "print") return PRINT_SIZES.map((s) => ({ id: s.id, label: s.label }));
+  if (productId === "shirt") return SHIRT_SIZES;
+  return [];
+}
