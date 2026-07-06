@@ -26,7 +26,10 @@ export async function createProdigiOrder(
     merchantReference: reference,
     sku: art.prodigiSku,
     copies: 1,
-    sizing: "fillPrintArea",
+    // fit (not fill) so the whole bird always prints — the plates are landscape and the FAP
+    // sizes are portrait, so fill would crop the tail/beak. Interim until we compose plates
+    // onto a portrait field-guide layout.
+    sizing: "fitPrintArea",
     assets: [{ printArea: "default", url: assetUrl }],
   };
   if (attributes && Object.keys(attributes).length) item.attributes = attributes;
