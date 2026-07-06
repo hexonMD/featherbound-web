@@ -3,6 +3,7 @@ import { join } from "path";
 import { plateUrl } from "./birds";
 import { canvasDims } from "./fieldplate";
 import { putToR2 } from "./upscale";
+import { resolveArtwork } from "./data";
 import { MAX_COLLAGE_BIRDS, MIN_COLLAGE_BIRDS, printSizeById } from "./products";
 
 // A personalized "collection" print: the birds a user collected, laid out as a field-guide
@@ -115,8 +116,8 @@ export async function composeCollage(
 }
 
 // ── Ordering: a collage from a client spec (app sends the selected birds) ─────────
-// One entry per selected bird. `slug` picks the plate off the flock-plates CDN; the rest
-// are what the user recorded (common name, seen date, optional area).
+// One entry per selected bird. `slug` (resolved from the app's sci/name) picks the plate off
+// the flock-plates CDN; the rest are what the user recorded (common name, seen date, area).
 export type CollageSpecBird = { slug: string; name: string; date: string; area?: string };
 export type CollageSpec = { birds: CollageSpecBird[]; title: string; sizeId: string };
 
@@ -127,14 +128,20 @@ export function parseCollageSpec(raw: unknown): { spec?: CollageSpec; error?: st
   const birdsIn = Array.isArray(body.birds) ? body.birds : null;
   if (!birdsIn) return { error: "birds required" };
   const birds: CollageSpecBird[] = [];
+  const seen = new Set<string>();
   for (const b of birdsIn) {
     const o = (b ?? {}) as Record<string, unknown>;
-    const slug = typeof o.slug === "string" ? o.slug.trim() : "";
-    const name = typeof o.name === "string" ? o.name.trim() : "";
+    // The app sends its species keys (sci name preferred, common as fallback); we resolve to
+    // the canonical flock-plate slug so a print always maps to a real plate on the CDN.
+    const sci = typeof o.sci === "string" ? o.sci.trim() : "";
+    const rawName = typeof o.name === "string" ? o.name.trim() : "";
     const date = typeof o.date === "string" ? o.date.trim() : "";
-    if (!slug || !name) continue; // skip junk rows rather than fail the whole order
+    const art = resolveArtwork(sci || rawName || "");
+    if (!art || seen.has(art.slug)) continue; // skip unmatched / duplicate species
+    seen.add(art.slug);
+    const name = (rawName || art.speciesCommon).slice(0, 60);
     const area = typeof o.area === "string" && o.area.trim() ? o.area.trim().slice(0, 60) : undefined;
-    birds.push({ slug, name: name.slice(0, 60), date: date.slice(0, 40), area });
+    birds.push({ slug: art.slug, name, date: date.slice(0, 40), area });
   }
   if (birds.length < MIN_COLLAGE_BIRDS)
     return { error: `pick at least ${MIN_COLLAGE_BIRDS} birds` };
