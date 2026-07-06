@@ -16,25 +16,25 @@ export default async function Image() {
           alignItems: "center",
           justifyContent: "space-between",
           background: "#efe7d6",
-          padding: "0 78px",
+          padding: "0 66px",
           color: "#2c271d",
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", maxWidth: 640 }}>
-          <div style={{ display: "flex", fontSize: 25, letterSpacing: 6, color: "#8a7f6a" }}>
+          <div style={{ display: "flex", fontSize: 24, letterSpacing: 6, color: "#8a7f6a" }}>
             AN ILLUSTRATED FIELD GUIDE
           </div>
-          <div style={{ display: "flex", fontSize: 108, fontWeight: 800, marginTop: 14, lineHeight: 1 }}>
+          <div style={{ display: "flex", fontSize: 90, fontWeight: 800, marginTop: 14, lineHeight: 1 }}>
             FeatherBound
           </div>
-          <div style={{ display: "flex", fontSize: 40, color: "#6b6250", marginTop: 24 }}>
+          <div style={{ display: "flex", fontSize: 38, color: "#6b6250", marginTop: 22 }}>
             Collect the birds around you.
           </div>
         </div>
         <img
-          src="https://featherbound.app/plate-robin.png"
-          width={430}
-          height={430}
+          src="https://featherbound.app/og-robin.png"
+          width={410}
+          height={346}
           style={{ objectFit: "contain" }}
         />
       </div>
