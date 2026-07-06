@@ -1,4 +1,5 @@
 import { featured } from "@/lib/data";
+import WaitlistForm from "@/components/WaitlistForm";
 
 export default function Home() {
   return (
@@ -11,12 +12,11 @@ export default function Home() {
           FeatherBound turns birdwatching into a living collection. Spot a bird, watch it
           bloom into an illustrated field-guide card, and fill your dex one species at a time.
         </p>
-        <div className="cta-row">
-          <a href="#" aria-label="Download on the App Store" className="badge">
-            <img src="/app-store-badge.svg" alt="Download on the App Store" width={176} height={59} />
-          </a>
-          <a className="cta ghost" href="#prints">Shop the prints</a>
-        </div>
+        <WaitlistForm />
+        <p className="hero-note">
+          Launching on iPhone soon — free to play. One email when it lands, nothing else.
+          {" "}<a href="#prints" style={{ color: "var(--accent)", fontWeight: 700 }}>Or shop the prints →</a>
+        </p>
         <div className="hero-art">
           <img src="/hero-icon.png" alt="FeatherBound field-guide robin" />
         </div>
@@ -43,8 +43,8 @@ export default function Home() {
             </div>
             <div className="card shot">
               <div className="phone"><img src="/screen-badges.png" alt="Collectible badges and streaks in FeatherBound" /></div>
-              <h3>Streaks &amp; badges</h3>
-              <p>Daily quests, rare-bird alerts near you, and collectible badges for the birds you chase.</p>
+              <h3>Friends &amp; streaks</h3>
+              <p>See what your friends have found, climb the leaderboards, keep a daily streak, and earn badges for the birds you chase.</p>
             </div>
           </div>
         </div>
@@ -53,10 +53,10 @@ export default function Home() {
       {/* Photo -> illustration transition */}
       <section className="section" id="transition">
         <div className="wrap">
-          <h2>Spot it, keep it illustrated.</h2>
+          <h2>From your photo to a plate worth keeping.</h2>
           <p className="lead">
-            Point your camera at a bird — FeatherBound identifies it and adds its
-            hand-illustrated field-guide plate to your collection.
+            Any honest sighting — even a blurry one — earns the full illustrated plate: the
+            version of that bird worth framing.
           </p>
           <div className="transition">
             <figure className="tcard">
@@ -103,9 +103,9 @@ export default function Home() {
         <div className="wrap">
           <h2>Help illustrate the guide.</h2>
           <p className="lead">
-            The plates you see today are placeholders — we&rsquo;re inviting real illustrators
-            to make them their own. Submit your bird art: it appears in the app next to the
-            bird you drew, credited to you, and sells as a fine-art print you earn from.
+            Every plate in FeatherBound is an open commission. Illustrators are claiming species
+            one by one — your art appears in the app beside the bird you drew, credited to you,
+            and sells as a fine-art print you earn from.
           </p>
           <div className="artist-cta">
             <div className="card">
