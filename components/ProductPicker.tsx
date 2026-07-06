@@ -31,32 +31,34 @@ export default function ProductPicker({
 
   return (
     <div style={{ marginTop: 12 }}>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
-        {products.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            onClick={() => {
-              setSel(p.id);
-              setSize(defaultSize(p.id));
-            }}
-            aria-pressed={sel === p.id}
-            style={{
-              flex: "1 1 45%",
-              padding: "7px 8px",
-              borderRadius: 9,
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: 700,
-              border: sel === p.id ? "1px solid var(--accent)" : "1px solid var(--line)",
-              background: sel === p.id ? "var(--accent)" : "transparent",
-              color: sel === p.id ? "#fff" : "var(--ink)",
-            }}
-          >
-            {p.emoji} {p.label}
-          </button>
-        ))}
-      </div>
+      {products.length > 1 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+          {products.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => {
+                setSel(p.id);
+                setSize(defaultSize(p.id));
+              }}
+              aria-pressed={sel === p.id}
+              style={{
+                flex: "1 1 45%",
+                padding: "7px 8px",
+                borderRadius: 9,
+                cursor: "pointer",
+                fontSize: 13,
+                fontWeight: 700,
+                border: sel === p.id ? "1px solid var(--accent)" : "1px solid var(--line)",
+                background: sel === p.id ? "var(--accent)" : "transparent",
+                color: sel === p.id ? "#fff" : "var(--ink)",
+              }}
+            >
+              {p.emoji} {p.label}
+            </button>
+          ))}
+        </div>
+      )}
       <div style={{ fontSize: 12.5, color: "var(--ink-2)", minHeight: 17, lineHeight: 1.35 }}>
         {active.blurb}
       </div>

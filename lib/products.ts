@@ -21,10 +21,11 @@ export type Product = {
 };
 
 export const PRODUCTS: Product[] = [
-  { id: "print", label: "Fine-art print", emoji: "🖼️", prodigiSku: "GLOBAL-FAP-16X24",     priceUsd: 34, blurb: 'Museum-quality fine-art paper, 16×24"', available: true },
-  { id: "shirt", label: "T-shirt",        emoji: "👕", prodigiSku: "GLOBAL-TEE-GIL-64000",  priceUsd: 32, blurb: "Soft cotton unisex tee, front print",     available: true },
-  { id: "mug",   label: "Mug",            emoji: "☕", prodigiSku: "GLOBAL-MUG-W",           priceUsd: 18, blurb: "11oz white ceramic mug, full wrap print",  available: true },
-  { id: "tote",  label: "Tote bag",       emoji: "👜", prodigiSku: "H-BAG-CTB",              priceUsd: 24, blurb: 'Canvas tote, 14×18.5", single-side print', available: true },
+  { id: "print", label: "Fine-art print", emoji: "🖼️", prodigiSku: "GLOBAL-FAP-16X24",     priceUsd: 34, blurb: 'Museum-quality fine-art paper', available: true },
+  // Apparel/drinkware verified + fulfil-ready, but hidden for launch — prints only for now.
+  { id: "shirt", label: "T-shirt",        emoji: "👕", prodigiSku: "GLOBAL-TEE-GIL-64000",  priceUsd: 32, blurb: "Soft cotton unisex tee, front print",     available: false },
+  { id: "mug",   label: "Mug",            emoji: "☕", prodigiSku: "GLOBAL-MUG-W",           priceUsd: 18, blurb: "11oz white ceramic mug, full wrap print",  available: false },
+  { id: "tote",  label: "Tote bag",       emoji: "👜", prodigiSku: "H-BAG-CTB",              priceUsd: 24, blurb: 'Canvas tote, 14×18.5", single-side print', available: false },
 ];
 
 // Only products with a confirmed-live Prodigi SKU — what the store actually offers.

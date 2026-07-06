@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { artworkBySlug } from "@/lib/data";
+import { resolveArtwork } from "@/lib/data";
 import ProductPicker from "@/components/ProductPicker";
+import FramedPreview from "@/components/FramedPreview";
 
 export async function generateMetadata({
   params,
@@ -8,7 +9,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const art = artworkBySlug(decodeURIComponent(slug));
+  const art = resolveArtwork(slug);
   if (!art) return { title: "Print — FeatherBound" };
   return {
     title: `${art.speciesCommon} fine-art print — FeatherBound`,
@@ -19,7 +20,7 @@ export async function generateMetadata({
 
 export default async function PrintPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const art = artworkBySlug(decodeURIComponent(slug));
+  const art = resolveArtwork(slug);
 
   if (!art) {
     return (
@@ -58,8 +59,8 @@ export default async function PrintPage({ params }: { params: Promise<{ slug: st
           marginBottom: 60,
         }}
       >
-        <div className="frame" style={{ flex: "1 1 320px", maxWidth: 460 }}>
-          <img src={art.image} alt={art.title} style={{ width: "100%", display: "block" }} />
+        <div style={{ flex: "1 1 320px", maxWidth: 480 }}>
+          <FramedPreview src={art.image} alt={art.title} />
         </div>
         <div style={{ flex: "1 1 300px", maxWidth: 460 }}>
           <p style={{ color: "var(--ink-2)", lineHeight: 1.5 }}>

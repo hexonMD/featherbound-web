@@ -58,8 +58,21 @@ export const artworks: Artwork[] = BIRDS.map((b: Bird) => ({
 }));
 
 const bySlug = new Map(artworks.map((a) => [a.slug, a]));
+const bySci = new Map(
+  artworks.filter((a) => a.speciesSci).map((a) => [a.speciesSci.toLowerCase(), a])
+);
 export function artworkBySlug(slug: string): Artwork | undefined {
   return bySlug.get(slug);
+}
+
+// Resolve a /print/<x> path param that may be a slug (new /store links) OR a scientific name
+// (the in-app "Buy this bird as a print" link sends the sci) OR a common name. Keeps existing
+// shipped-app links working without an app update.
+const slugify = (s: string) =>
+  s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-+|-+$/g, "");
+export function resolveArtwork(param: string): Artwork | undefined {
+  const p = decodeURIComponent(param);
+  return bySlug.get(p) ?? bySci.get(p.toLowerCase()) ?? bySlug.get(slugify(p));
 }
 
 export function artworksForSpecies(sci: string): Artwork[] {
