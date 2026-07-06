@@ -21,10 +21,11 @@ export async function POST(req: NextRequest) {
         apikey: ANON,
         Authorization: `Bearer ${ANON}`,
         "Content-Type": "application/json",
-        Prefer: "return=minimal, resolution=ignore-duplicates",
+        Prefer: "return=minimal",
       },
       body: JSON.stringify({ email }),
     });
+    // 409 = already on the list (unique email) — treat as success.
     if (!res.ok && res.status !== 409) {
       return NextResponse.json({ error: "Something went wrong — try again." }, { status: 500 });
     }
