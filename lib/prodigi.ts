@@ -8,7 +8,9 @@
 // is what makes it a robin vs a chickadee. `reference` is a human-readable "<Bird> — <Product>"
 // label stamped on the order (and each item) so orders read by bird + product in dashboards.
 export async function createProdigiOrder(
-  art: { prodigiSku: string; image: string },
+  // `assetUrl` is the actual print asset Prodigi fetches — a high-res upscaled master when
+  // available (see lib/upscale.ts), falling back to the on-site plate.
+  art: { prodigiSku: string; image: string; assetUrl?: string },
   recipient: Record<string, unknown>,
   reference?: string,
   // Prodigi item attributes — required for apparel (e.g. { size: "l", color: "white" }); the
@@ -17,12 +19,13 @@ export async function createProdigiOrder(
 ) {
   const key = process.env.PRODIGI_API_KEY;
   if (!key) throw new Error("PRODIGI_API_KEY not set");
+  const assetUrl = art.assetUrl ?? `https://featherbound.app${art.image}`;
   const item: Record<string, unknown> = {
     merchantReference: reference,
     sku: art.prodigiSku,
     copies: 1,
     sizing: "fillPrintArea",
-    assets: [{ printArea: "default", url: `https://featherbound.app${art.image}` }],
+    assets: [{ printArea: "default", url: assetUrl }],
   };
   if (attributes && Object.keys(attributes).length) item.attributes = attributes;
   const res = await fetch("https://api.prodigi.com/v4.0/Orders", {

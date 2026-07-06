@@ -8,6 +8,7 @@
     "start": "next start -p 3000"
   },
   "dependencies": {
+    "aws4fetch": "^1.0.20",
     "next": "^15.5.20",
     "react": "19.0.0",
     "react-dom": "19.0.0",

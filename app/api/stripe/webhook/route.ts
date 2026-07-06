@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { artworks } from "@/lib/data";
 import { productById, SHIRT_COLOR } from "@/lib/products";
 import { createProdigiOrder } from "@/lib/prodigi";
+import { printMasterUrl, plateSlug } from "@/lib/upscale";
 
 // Stripe → Prodigi fulfilment. Fires after a Checkout payment clears. Verifies the Stripe
 // signature (STRIPE_WEBHOOK_SECRET), then places the print-on-demand order with the shipping
@@ -65,9 +66,12 @@ export async function POST(req: NextRequest) {
       } else if (md.productType === "print") {
         attributes = { paperType: "EMA", substrateWeight: "200gsm" };
       }
+      // Upscale this bird's plate to print resolution (cached in R2), then fulfil with that
+      // high-res master. Falls back to the on-site plate if the upscaler isn't configured.
+      const assetUrl = await printMasterUrl(art.image, plateSlug(art.speciesCommon));
       try {
         await createProdigiOrder(
-          { prodigiSku: md.prodigiSku || art.prodigiSku, image: art.image },
+          { prodigiSku: md.prodigiSku || art.prodigiSku, image: art.image, assetUrl },
           recipient,
           reference,
           attributes
