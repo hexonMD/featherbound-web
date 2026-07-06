@@ -73,6 +73,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <br /><a href="/terms">Terms</a>
               <br /><a href="/support">Support</a>
             </div>
+            <div>
+              <a href="https://discord.gg/D6v2JD46g9" target="_blank" rel="noopener noreferrer">Discord community</a>
+              <br /><a href="mailto:support@featherbound.app">Contact</a>
+            </div>
           </div>
           <div className="wrap footer-legal">
             © 2026 FeatherBound · Prints fulfilled by Prodigi · Every plate © its artist

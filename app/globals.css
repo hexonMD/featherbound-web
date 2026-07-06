@@ -159,7 +159,7 @@ img { max-width: 100%; display: block; }
 .prose .back { display: inline-block; margin-bottom: 20px; color: var(--ink-2); font-size: 14px; }
 
 /* footer */
-.footer-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 24px; text-align: left; padding-bottom: 22px; }
+.footer-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 24px; text-align: left; padding-bottom: 22px; }
 .footer-grid a { color: var(--ink-2); line-height: 1.9; display: inline; }
 .footer-grid a:hover { color: var(--ink); }
 .footer-grid strong { color: var(--ink); }
