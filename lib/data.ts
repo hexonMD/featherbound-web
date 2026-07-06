@@ -32,7 +32,11 @@ export type Artwork = {
 
 // House artist marker — used for the app's own plates until real artists submit.
 export const HOUSE = "house";
-const BASE_PRINT_PRICE = 34;
+// Single-plate 16×24 base, all-in (we absorb Prodigi shipping — no shipping line at checkout).
+// $34 barely cleared shipping (≈$3 net to Canada); $39 lifts US margin to ~40% and keeps
+// Canada positive, while staying under the collage's $44 so the collection print stays the
+// premium buy. Sizes scale off this via PRINT_SIZES.mult.
+const BASE_PRINT_PRICE = 39;
 
 export const artists: Artist[] = [
   {
