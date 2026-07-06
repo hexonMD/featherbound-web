@@ -1,24 +1,60 @@
 import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
 import { artworks } from "@/lib/data";
+import { productById } from "@/lib/products";
 
-// Server-side print ordering. The Prodigi key lives ONLY in env (PRODIGI_API_KEY) and is
-// never exposed to the browser. Full flow (to wire next): Stripe Checkout for payment →
-// webhook → createProdigiOrder() (see lib/prodigi.ts). Payment isn't connected yet, so
-// this returns a friendly placeholder.
+// Print ordering — real Stripe Checkout. The secret key is server-side only (env). Flow:
+// this creates a hosted Checkout Session (collects payment + shipping address) and redirects
+// the buyer to it. On payment, Stripe fires /api/stripe/webhook, which creates the Prodigi
+// order for fulfilment (see lib/prodigi.ts). Nothing is printed until money clears.
+export const runtime = "nodejs";
+
+const SITE = "https://featherbound.app";
+
+// Where Prodigi can currently ship. Keep in sync with fulfilment coverage.
+const SHIP_COUNTRIES: Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[] =
+  ["US", "CA", "GB", "IE", "AU", "NZ", "FR", "DE", "NL", "SE", "NO", "DK", "FI", "ES", "IT", "BE", "AT", "CH", "PT"];
+
 export async function POST(req: NextRequest) {
-  const form = await req.formData();
-  const id = String(form.get("artworkId") ?? "");
-  const art = artworks.find((a) => a.id === id);
-  if (!art) return NextResponse.json({ error: "unknown artwork" }, { status: 404 });
+  const secret = process.env.STRIPE_SECRET_KEY;
+  if (!secret) return NextResponse.json({ error: "payments not configured" }, { status: 503 });
+  const stripe = new Stripe(secret);
 
-  return new NextResponse(
-    `<!doctype html><html><body style="font-family:Georgia,serif;background:#f0e4cb;color:#2c271d;text-align:center;padding:90px 24px">
-       <h1 style="font-size:34px">Checkout coming soon</h1>
-       <p style="color:#6b6150;max-width:460px;margin:14px auto 0;line-height:1.5">
-         Print ordering for <b>${art.speciesCommon}</b> is being wired up (payment and fulfilment). It will be live shortly.
-       </p>
-       <p style="margin-top:26px"><a href="/#prints" style="color:#3f6d5a;font-weight:700">Back to prints</a></p>
-     </body></html>`,
-    { headers: { "content-type": "text/html" } }
-  );
+  const form = await req.formData();
+  const artworkId = String(form.get("artworkId") ?? "");
+  const productType = String(form.get("productType") ?? "print");
+  const art = artworks.find((a) => a.id === artworkId);
+  const product = productById(productType);
+  if (!art || !product) return NextResponse.json({ error: "unknown item" }, { status: 404 });
+
+  // The fine-art print uses the artwork's own price + SKU; other products use the catalogue.
+  const priceUsd = productType === "print" ? art.priceUsd : product.priceUsd;
+  const prodigiSku = productType === "print" ? art.prodigiSku : product.prodigiSku;
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: "usd",
+          unit_amount: Math.round(priceUsd * 100),
+          product_data: {
+            name: `${art.speciesCommon} — ${product.label}`,
+            description: product.blurb,
+            images: [`${SITE}${art.image}`],
+          },
+        },
+      },
+    ],
+    shipping_address_collection: { allowed_countries: SHIP_COUNTRIES },
+    phone_number_collection: { enabled: true },
+    success_url: `${SITE}/print/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${SITE}/print/${encodeURIComponent(art.speciesSci)}`,
+    // The webhook needs these to fulfil the right item after payment clears.
+    metadata: { artworkId: art.id, productType, prodigiSku },
+  });
+
+  if (!session.url) return NextResponse.json({ error: "could not start checkout" }, { status: 502 });
+  return NextResponse.redirect(session.url, 303);
 }
