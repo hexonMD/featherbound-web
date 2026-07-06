@@ -93,10 +93,15 @@ export async function putToR2(key: string, bytes: Uint8Array | ArrayBuffer) {
   });
   const endpoint =
     `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${process.env.R2_BUCKET}/${key}`;
+  // R2 requires a Content-Length on PUT (no chunked transfer). undici omits it for some body
+  // shapes → "R2 PUT 411". Normalize to a standalone ArrayBuffer with an explicit length so
+  // the header is always present and aws4fetch signs it.
+  const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  const ab = u8.buffer.slice(u8.byteOffset, u8.byteOffset + u8.byteLength);
   const res = await client.fetch(endpoint, {
     method: "PUT",
-    body: bytes as BodyInit,
-    headers: { "content-type": "image/png" },
+    body: ab,
+    headers: { "content-type": "image/png", "content-length": String(u8.byteLength) },
   });
   if (!res.ok) throw new Error(`R2 PUT ${res.status}`);
 }
