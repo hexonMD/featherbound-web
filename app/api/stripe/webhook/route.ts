@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { artworks } from "@/lib/data";
+import { productById } from "@/lib/products";
 import { createProdigiOrder } from "@/lib/prodigi";
 
 // Stripe → Prodigi fulfilment. Fires after a Checkout payment clears. Verifies the Stripe
@@ -51,10 +52,15 @@ export async function POST(req: NextRequest) {
           stateOrCounty: a.state ?? undefined,
         },
       };
+      // Readable order label: "<Bird> — <Product>" (e.g. "American Robin — Fine-art print"),
+      // stamped on the Prodigi order so it reads by bird + product, matching the Stripe line item.
+      const product = productById(md.productType || "print");
+      const reference = `${art.speciesCommon} — ${product?.label ?? md.productType}`;
       try {
         await createProdigiOrder(
           { prodigiSku: md.prodigiSku || art.prodigiSku, image: art.image },
-          recipient
+          recipient,
+          reference
         );
       } catch (err) {
         // Don't 500 back to Stripe on a fulfilment hiccup — the payment is already captured.

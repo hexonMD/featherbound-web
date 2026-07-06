@@ -1,11 +1,11 @@
 "use client";
 import { useState } from "react";
-import { PRODUCTS } from "@/lib/products";
+import { AVAILABLE_PRODUCTS } from "@/lib/products";
 
-/// Per-artwork product selector: the same bird illustration on a print, tee, mug or tote.
-/// The "print" option uses the artwork's own price; everything else comes from the product
-/// catalogue. Posts the chosen product to /api/order (which is placeholdered until Stripe
-/// checkout is wired — Prodigi fulfilment is product-agnostic and already handles any SKU).
+/// Per-artwork product selector. Only shows products with a confirmed-live Prodigi SKU
+/// (AVAILABLE_PRODUCTS) so a buyer can't pay for something fulfilment can't make. The "print"
+/// option uses the artwork's own price; everything else comes from the product catalogue.
+/// Posts the chosen product to /api/order, which starts Stripe Checkout.
 export default function ProductPicker({
   artworkId,
   printPriceUsd,
@@ -14,7 +14,7 @@ export default function ProductPicker({
   printPriceUsd: number;
 }) {
   const [sel, setSel] = useState("print");
-  const products = PRODUCTS.map((p) =>
+  const products = AVAILABLE_PRODUCTS.map((p) =>
     p.id === "print" ? { ...p, priceUsd: printPriceUsd } : p
   );
   const active = products.find((p) => p.id === sel)!;

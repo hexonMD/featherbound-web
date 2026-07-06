@@ -26,6 +26,9 @@ export async function POST(req: NextRequest) {
   const art = artworks.find((a) => a.id === artworkId);
   const product = productById(productType);
   if (!art || !product) return NextResponse.json({ error: "unknown item" }, { status: 404 });
+  // Never start checkout for a product whose Prodigi SKU isn't confirmed live — a paid order
+  // we can't fulfil means a refund. The picker already hides these; this guards direct POSTs.
+  if (!product.available) return NextResponse.json({ error: "product unavailable" }, { status: 409 });
 
   // The fine-art print uses the artwork's own price + SKU; other products use the catalogue.
   const priceUsd = productType === "print" ? art.priceUsd : product.priceUsd;
