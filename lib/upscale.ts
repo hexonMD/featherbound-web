@@ -97,7 +97,7 @@ export async function putToR2(key: string, bytes: Uint8Array | ArrayBuffer) {
   // shapes → "R2 PUT 411". Normalize to a standalone ArrayBuffer with an explicit length so
   // the header is always present and aws4fetch signs it.
   const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-  const ab = u8.buffer.slice(u8.byteOffset, u8.byteOffset + u8.byteLength);
+  const ab = u8.slice().buffer as ArrayBuffer; // fresh, exactly-sized standalone ArrayBuffer
   const res = await client.fetch(endpoint, {
     method: "PUT",
     body: ab,
