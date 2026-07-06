@@ -42,7 +42,7 @@ export default function Home() {
               <p>Every species, greyed until you find it — then it turns to full colour. Rarity, range and season on every page.</p>
             </div>
             <div className="card shot">
-              <div className="phone"><img src="/screen-badges.png" alt="A FeatherBound collection — illustrated cards by rarity, with legendaries and collection value" /></div>
+              <div className="phone"><img src="/screen-badges.png" alt="A FeatherBound friends' league — monthly leaderboard standings and a feed of friends' latest finds" /></div>
               <h3>Friends &amp; streaks</h3>
               <p>See what your friends have found, climb the leaderboards, keep a daily streak, and earn badges for the birds you chase.</p>
             </div>
