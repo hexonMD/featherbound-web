@@ -1,8 +1,17 @@
 import { ImageResponse } from "next/og";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "FeatherBound — Collect the birds around you";
+
+// Embed the bird from disk (not an HTTP fetch) — a same-domain fetch resolves the OLD
+// deployment during build, so a newly-added image 404s and renders blank. Reading the file
+// as a data URI is deterministic.
+const robin =
+  "data:image/png;base64," +
+  readFileSync(join(process.cwd(), "public/og-robin.png")).toString("base64");
 
 // Rich-link preview image (auto-wired as og:image + twitter:image by Next).
 export default async function Image() {
@@ -31,12 +40,7 @@ export default async function Image() {
             Collect the birds around you.
           </div>
         </div>
-        <img
-          src="https://featherbound.app/og-robin.png"
-          width={410}
-          height={346}
-          style={{ objectFit: "contain" }}
-        />
+        <img src={robin} width={410} height={346} style={{ objectFit: "contain" }} />
       </div>
     ),
     { ...size }
