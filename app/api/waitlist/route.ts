@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
         apikey: ANON,
         Authorization: `Bearer ${ANON}`,
         "Content-Type": "application/json",
-        Prefer: "resolution=ignore-duplicates",
+        Prefer: "return=minimal, resolution=ignore-duplicates",
       },
       body: JSON.stringify({ email }),
     });
