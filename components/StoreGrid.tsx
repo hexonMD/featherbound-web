@@ -15,6 +15,39 @@ export default function StoreGrid({ items }: { items: Item[] }) {
 
   return (
     <>
+      {/* Field-guide plates (the app's own) vs artist prints — kept visibly separate so
+          buyers know which is which. Artist prints open as illustrators submit. */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+        <span
+          style={{
+            padding: "7px 15px",
+            borderRadius: 20,
+            fontSize: 13.5,
+            fontWeight: 700,
+            background: "var(--accent)",
+            color: "#fff",
+          }}
+        >
+          Field-guide plates
+        </span>
+        <span
+          title="Prints by named illustrators — opening soon"
+          style={{
+            padding: "7px 15px",
+            borderRadius: 20,
+            fontSize: 13.5,
+            fontWeight: 700,
+            border: "1px dashed var(--line)",
+            background: "transparent",
+            color: "var(--ink-2)",
+            opacity: 0.55,
+            cursor: "default",
+          }}
+        >
+          Artist prints · soon
+        </span>
+      </div>
+
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}

@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "FeatherBound — the illustrated bird-identification game",
   description:
-    "FeatherBound is a bird identification app that plays like a game: point your camera at a bird, identify it on-device, and collect its hand-illustrated field-guide plate. Fill your BirdDex, compete with friends, and order fine-art prints.",
+    "FeatherBound is a bird identification app that plays like a game: point your camera at a bird, identify it on-device, and collect its illustrated field-guide plate. Fill your BirdDex, compete with friends, and order fine-art prints.",
   metadataBase: new URL("https://featherbound.app"),
   keywords: [
     "bird identification app", "birding game", "bird watching app", "illustrated field guide",
@@ -14,14 +14,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: "FeatherBound — the illustrated birding game",
     description:
-      "Point your camera at a bird, identify it on-device, and collect its hand-illustrated field-guide plate. Fill your BirdDex, compete with friends.",
+      "Point your camera at a bird, identify it on-device, and collect its illustrated field-guide plate. Fill your BirdDex, compete with friends.",
     type: "website",
     url: "https://featherbound.app",
   },
   twitter: {
     card: "summary_large_image",
     title: "FeatherBound — the illustrated birding game",
-    description: "Identify birds and collect their hand-illustrated field-guide plates.",
+    description: "Identify birds and collect their illustrated field-guide plates.",
   },
 };
 
@@ -32,7 +32,7 @@ const appLd = {
   applicationCategory: "GameApplication",
   operatingSystem: "iOS",
   description:
-    "A bird identification game: identify birds on-device and collect their hand-illustrated field-guide plates.",
+    "A bird identification game: identify birds on-device and collect their illustrated field-guide plates.",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   url: "https://featherbound.app",
 };
