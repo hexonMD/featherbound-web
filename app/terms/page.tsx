@@ -26,13 +26,29 @@ export default function Terms() {
         league, you grant us a licence to store and display it to those people for that purpose.
       </p>
 
+      <h2>Helping improve identification (optional)</h2>
+      <p>
+        This part is <strong>completely optional and off by default</strong>. FeatherBound works
+        fully whether or not you take part, and you never have to. A future version of the app may
+        offer a setting that lets you voluntarily contribute confirmed bird captures to help
+        improve our identification models.
+      </p>
+      <p>
+        If — and only if — you choose to turn that setting on, you grant FeatherBound a
+        <strong> non-exclusive</strong> licence to use the confirmed bird photos, recordings, and
+        their species labels to improve bird identification models. You keep ownership of your
+        photos and recordings; we make no claim to them. You can withdraw at any time, which stops
+        any further use of newly contributed captures.
+      </p>
+
       <h2>Artist submissions</h2>
       <p>
         If you submit illustrations, <strong>you keep the copyright</strong>. You grant us a
-        licence to display your art in the app beside the species you drew, credited to you, and
-        to sell it as prints. You earn a share of every print sold featuring your work; full
-        contributor terms are shared when your submission is accepted. Only submit art you made
-        and have the right to license.
+        <strong> non-exclusive</strong> licence to display your art in the app beside the species
+        you drew, credited to you, and to sell it as prints — and you remain free to use, license,
+        or sell the same work anywhere else, unless we agree otherwise in writing. You earn a
+        share of every print sold featuring your work; full contributor terms are shared when your
+        submission is accepted. Only submit art you made and have the right to license.
       </p>
 
       <h2>Prints and purchases</h2>

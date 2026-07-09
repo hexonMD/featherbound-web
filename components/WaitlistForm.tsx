@@ -32,7 +32,7 @@ export default function WaitlistForm() {
   }
 
   if (state === "done") {
-    return <p className="wl-done">You&rsquo;re on the list — we&rsquo;ll email you the moment it lands. 🐦</p>;
+    return <p className="wl-done">You&rsquo;re on the list — one email at launch, and you can unsubscribe anytime. 🐦</p>;
   }
 
   return (

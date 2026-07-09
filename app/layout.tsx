@@ -71,6 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div>
               <a href="/privacy">Privacy</a>
               <br /><a href="/terms">Terms</a>
+              <br /><a href="/responsible-ai">Responsible AI</a>
               <br /><a href="/support">Support</a>
             </div>
             <div>

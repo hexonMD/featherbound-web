@@ -14,7 +14,8 @@ export default function Home() {
         </p>
         <WaitlistForm />
         <p className="hero-note">
-          Launching on iPhone soon — free to play. One email when it lands, nothing else.
+          Launching on iPhone soon — free to play. Launch updates only: one email when it
+          lands, unsubscribe anytime, no spam.
           {" "}<a href="#prints" style={{ color: "var(--accent)", fontWeight: 700 }}>Or shop the prints →</a>
         </p>
         <div className="hero-art">
@@ -27,8 +28,9 @@ export default function Home() {
         <div className="wrap">
           <h2>Birding, illustrated.</h2>
           <p className="lead">
-            Point your camera at a bird. On-device AI names it, and it reveals as a
-            field-guide plate you keep forever.
+            Point your camera at a bird. On-device AI names it — your photos and recordings
+            never leave your phone to be identified — and it reveals as a field-guide plate
+            you keep forever.
           </p>
           <div className="grid3 shots">
             <div className="card shot">
@@ -69,7 +71,7 @@ export default function Home() {
               <figcaption>Your card</figcaption>
             </figure>
           </div>
-          <p className="tcredit">Photo via iNaturalist (public domain)</p>
+          <p className="tcredit">Photo: public domain</p>
         </div>
       </section>
 
@@ -135,7 +137,7 @@ export default function Home() {
               <li><b>True to the bird.</b> Field-guide accurate — the right plumage, proportions and the key marks a birder identifies it by.</li>
               <li><b>One bird, clean plate.</b> A single species on a transparent or simple background, so it reads as a guide plate and drops cleanly onto a tee or mug.</li>
               <li><b>Print-ready.</b> High resolution — 300 DPI, longest edge at least 3000px — as a PNG or layered file.</li>
-              <li><b>Your own work.</b> Original art you hold the rights to license. A distinctive style is a plus; personality beats photorealism.</li>
+              <li><b>Your own work.</b> Original art you hold the rights to license — you keep the copyright and can keep using it anywhere else. A distinctive style is a plus; personality beats photorealism.</li>
               <li><b>Species that fill gaps.</b> Common North American and European birds help most first — that&rsquo;s most of what players are catching.</li>
               <li><b>A range, if you can.</b> Male/female or seasonal plumages of the same species are especially welcome.</li>
             </ul>
