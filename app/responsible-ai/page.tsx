@@ -40,13 +40,26 @@ export default function ResponsibleAI() {
         photos or recordings.
       </p>
 
+      <h2>Our identification models are our own</h2>
+      <p>
+        The models that name your birds are built by us, not rented from a third party. We create
+        them by <em>distilling</em> openly-licensed foundation models — a permissively-licensed
+        vision model for photos, and a permissively-licensed bird-sound model for calls — down into
+        small models that run entirely on your phone. Our photo model is trained{" "}
+        <strong>only on images released under public-domain or Creative Commons CC0 / CC-BY
+        licences</strong>, which permit commercial use. Our sound model is our own clean-room model
+        — we do not use Cornell&rsquo;s BirdNET or any dataset whose terms forbid this use.
+      </p>
+
       <h2>We respect creators and data licences</h2>
       <p>
-        Every field-guide plate is drawn by a real illustrator, credited in the app, who keeps the
-        copyright to their work. Reference information — rarity, range, and seasonality — is built
-        from open, publicly available biodiversity data used within its licence. We build our
-        identification on models and data we&rsquo;re permitted to use commercially, and we avoid
-        sources whose terms don&rsquo;t allow it.
+        Our house field-guide plates are illustrations produced by our own pipeline — they are not
+        lifted from photographers or artists. As the print marketplace opens, work by named
+        illustrators will be credited to them, and they keep the copyright to their own work.
+        Reference information — rarity, range, and seasonality — is built from open, publicly
+        available biodiversity data used within its licence. Across the board we build on models
+        and data we&rsquo;re permitted to use commercially, and we avoid sources whose terms
+        don&rsquo;t allow it.
       </p>
 
       <h2>No ads, no selling your data</h2>
