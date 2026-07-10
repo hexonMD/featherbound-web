@@ -7,7 +7,7 @@
 // generated from the flock-plates set (lib/birds.ts); real illustrators' artworks land in
 // Postgres once the marketplace opens.
 
-import { BIRDS, plateUrl, type Bird } from "./birds";
+import { BIRDS, plateUrl, type Bird, type Region } from "./birds";
 
 export type Artist = {
   slug: string;
@@ -28,6 +28,7 @@ export type Artwork = {
   title: string;
   prodigiSku: string;   // default print SKU; size ladder in lib/products.ts overrides per size
   priceUsd: number;     // base (16×24) price; size multipliers scale it
+  regions: Region[];    // "na" | "eu" for the store's location filter (empty = rest of world)
 };
 
 // House artist marker — used for the app's own plates until real artists submit.
@@ -59,6 +60,7 @@ export const artworks: Artwork[] = BIRDS.map((b: Bird) => ({
   title: `${b.common} — Field Plate`,
   prodigiSku: "GLOBAL-FAP-16X24",
   priceUsd: BASE_PRINT_PRICE,
+  regions: b.regions,
 }));
 
 const bySlug = new Map(artworks.map((a) => [a.slug, a]));

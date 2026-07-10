@@ -1,17 +1,29 @@
 "use client";
 import { useState } from "react";
 
-type Item = { slug: string; common: string; image: string; price: number };
+type Item = { slug: string; common: string; image: string; price: number; regions: ("na" | "eu")[] };
 
-/// The browsable storefront: search across every bird, click through to its print page.
-/// We cap the rendered grid (DOM stays light) and lean on search to reach the long tail —
-/// nobody scrolls 1,682 cards, but everyone can find "cardinal" instantly.
+/// The browsable storefront: search + a location filter across every bird, click through to its
+/// print page. We cap the rendered grid (DOM stays light) and lean on search/filter to reach the
+/// long tail — nobody scrolls 10k cards, but everyone can narrow to their region or find "cardinal".
 const CAP = 300;
+
+const REGIONS = [
+  ["all", "All birds"],
+  ["na", "North America"],
+  ["eu", "Europe"],
+  ["row", "Rest of world"],
+] as const;
 
 export default function StoreGrid({ items }: { items: Item[] }) {
   const [q, setQ] = useState("");
+  const [region, setRegion] = useState<"all" | "na" | "eu" | "row">("all");
   const query = q.trim().toLowerCase();
-  const shown = query ? items.filter((i) => i.common.toLowerCase().includes(query)) : items;
+  const byRegion =
+    region === "all" ? items
+    : region === "row" ? items.filter((i) => i.regions.length === 0)
+    : items.filter((i) => i.regions.includes(region));
+  const shown = query ? byRegion.filter((i) => i.common.toLowerCase().includes(query)) : byRegion;
 
   return (
     <>
@@ -48,10 +60,33 @@ export default function StoreGrid({ items }: { items: Item[] }) {
         </span>
       </div>
 
+      {/* Location filter — narrow the ~10k plates to a region so it's browsable, not just searchable. */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
+        {REGIONS.map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setRegion(key)}
+            style={{
+              padding: "6px 13px",
+              borderRadius: 20,
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              border: region === key ? "1px solid var(--accent)" : "1px solid var(--line)",
+              background: region === key ? "var(--accent)" : "transparent",
+              color: region === key ? "#fff" : "var(--ink-2)",
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Search 1,682 birds…"
+        placeholder={`Search ${items.length.toLocaleString()} birds…`}
         aria-label="Search birds"
         style={{
           width: "100%",

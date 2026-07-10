@@ -99,7 +99,7 @@ export default function Home() {
           </div>
           <div style={{ textAlign: "center", marginTop: 34 }}>
             <a className="cta" href="/store" style={{ display: "inline-flex" }}>
-              Shop all 1,682 birds →
+              Shop all 10,000+ birds →
             </a>
           </div>
         </div>

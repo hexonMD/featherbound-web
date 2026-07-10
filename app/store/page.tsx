@@ -4,7 +4,7 @@ import StoreGrid from "@/components/StoreGrid";
 export const metadata = {
   title: "Bird print store — FeatherBound",
   description:
-    "Museum-quality fine-art prints of 1,682 birds — the full field-guide plate collection. Also on tees, mugs and totes. Printed to order, shipped worldwide.",
+    "Museum-quality fine-art prints of 10,000+ birds — the full field-guide plate collection, filterable by region. Also on tees, mugs and totes. Printed to order, shipped worldwide.",
 };
 
 export default function StorePage() {
@@ -14,6 +14,7 @@ export default function StorePage() {
     common: a.speciesCommon,
     image: a.image,
     price: a.priceUsd,
+    regions: a.regions,
   }));
 
   return (
