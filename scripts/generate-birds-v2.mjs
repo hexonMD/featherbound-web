@@ -38,16 +38,11 @@ for (const l of fs.readFileSync(S2C, "utf8").split(/\r?\n/)) {
   if (!sciSlugMap.has(ss)) sciSlugMap.set(ss, { sci, common });
 }
 
-// region buckets: sci -> Set('na'|'eu')
-const regionData = JSON.parse(fs.readFileSync(REGIONS, "utf8"));
-const sciRegions = new Map();
-for (const [code, species] of Object.entries(regionData)) {
-  const bucket = code.startsWith("US-") || code.startsWith("CA-") ? "na" : "eu";
-  for (const sci of Object.keys(species)) {
-    if (!sciRegions.has(sci)) sciRegions.set(sci, new Set());
-    sciRegions.get(sci).add(bucket);
-  }
-}
+// region buckets from the FULL eBird US+CA / EU country species lists (scripts/region-sci.json,
+// generated via the eBird spplist API — ~1,429 NA + 1,201 EU species, not just the seasonality subset).
+const regionSci = JSON.parse(fs.readFileSync("C:/Users/Mike Doyle/featherbound-web/scripts/region-sci.json", "utf8"));
+const naSet = new Set(regionSci.na);
+const euSet = new Set(regionSci.eu);
 
 // existing resolved names (keep quality)
 const existing = new Map(); // slug -> {sci, common}
@@ -61,7 +56,11 @@ const bySlug = [];
 for (const slug of slugs) {
   let r = existing.get(slug) || commonSlugMap.get(slug) || sciSlugMap.get(slug);
   if (!r) r = { sci: "", common: deslug(slug) };
-  const regions = r.sci ? [...(sciRegions.get(r.sci) || [])] : [];
+  const regions = [];
+  if (r.sci) {
+    if (naSet.has(r.sci)) regions.push("na");
+    if (euSet.has(r.sci)) regions.push("eu");
+  }
   bySlug.push({ sci: r.sci, common: r.common, slug, regions });
 }
 
