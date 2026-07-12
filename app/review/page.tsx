@@ -4,13 +4,13 @@ import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 // Hidden plate-review gallery: every bird's illustration next to a real photo, with a shared
 // Checked / Failed status + notes per bird (stored server-side via /api/review). Not linked anywhere.
 
-type Bird = { s: string; n: string; sci?: string; t?: string; c?: number; d?: number };
+type Bird = { s: string; n: string; sci?: string; t?: string; c?: number; d?: number; v?: number };
 type Status = "checked" | "failed";
 type Entry = { status?: Status; note?: string; by?: string; at?: number };
 type State = Record<string, Entry>;
 
-const PLATE = (slug: string) =>
-  `https://raw.githubusercontent.com/hexonMD/flock-plates/main/${slug}.png`;
+const PLATE = (b: Bird) =>
+  `https://raw.githubusercontent.com/hexonMD/flock-plates/main/${b.s}.png${b.v ? `?v=${b.v}` : ""}`;
 const PAGE = 48;
 const TABS = ["Suspicious", "Unchecked", "Checked", "Failed", "All"] as const;
 type Tab = (typeof TABS)[number];
@@ -57,7 +57,7 @@ function Card({ bird, entry, who, onSet }: {
     <div className={`card ${status || ""}`}>
       <div className="imgs">
         <figure>
-          <img src={PLATE(bird.s)} alt="plate" loading="lazy"
+          <img src={PLATE(bird)} alt="plate" loading="lazy"
                onError={(e) => ((e.target as HTMLImageElement).style.opacity = "0.15")} />
           <figcaption>illustration</figcaption>
         </figure>
