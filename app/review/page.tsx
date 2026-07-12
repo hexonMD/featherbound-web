@@ -12,7 +12,7 @@ type State = Record<string, Entry>;
 const PLATE = (slug: string) =>
   `https://raw.githubusercontent.com/hexonMD/flock-plates/main/${slug}.png`;
 const PAGE = 48;
-const TABS = ["In-App", "Suspicious", "Unchecked", "Checked", "Failed", "All"] as const;
+const TABS = ["Suspicious", "Unchecked", "Checked", "Failed", "All"] as const;
 type Tab = (typeof TABS)[number];
 
 // iNat reference photo, fetched client-side by scientific name and cached in localStorage.
@@ -88,7 +88,8 @@ function Card({ bird, entry, who, onSet }: {
 export default function ReviewPage() {
   const [birds, setBirds] = useState<Bird[]>([]);
   const [state, setState] = useState<State>({});
-  const [tab, setTab] = useState<Tab>("In-App");
+  const [tab, setTab] = useState<Tab>("Unchecked");
+  const [inApp, setInApp] = useState(true);
   const [q, setQ] = useState("");
   const [page, setPage] = useState(0);
   const [who, setWho] = useState("");
@@ -126,7 +127,7 @@ export default function ReviewPage() {
     const ql = q.trim().toLowerCase();
     return birds.filter((b) => {
       const st = state[b.s]?.status;
-      if (tab === "In-App" && !b.d) return false;
+      if (inApp && !b.d) return false;   // In-app-only toggle, stacks on top of the status tab
       if (tab === "Suspicious" && !(b.t && st !== "checked")) return false;
       if (tab === "Unchecked" && st) return false;
       if (tab === "Checked" && st !== "checked") return false;
@@ -134,15 +135,19 @@ export default function ReviewPage() {
       if (ql && !b.n.toLowerCase().includes(ql) && !(b.sci || "").toLowerCase().includes(ql)) return false;
       return true;
     });
-  }, [birds, state, tab, q]);
+  }, [birds, state, tab, q, inApp]);
 
-  useEffect(() => { setPage(0); }, [tab, q]);
+  useEffect(() => { setPage(0); }, [tab, q, inApp]);
 
   const counts = useMemo(() => {
-    let c = 0, f = 0;
-    for (const b of birds) { const s = state[b.s]?.status; if (s === "checked") c++; else if (s === "failed") f++; }
-    return { c, f, total: birds.length, done: c + f };
-  }, [birds, state]);
+    let c = 0, f = 0, total = 0;
+    for (const b of birds) {
+      if (inApp && !b.d) continue;   // progress reflects the current in-app scope
+      total++;
+      const s = state[b.s]?.status; if (s === "checked") c++; else if (s === "failed") f++;
+    }
+    return { c, f, total, done: c + f };
+  }, [birds, state, inApp]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
   const slice = filtered.slice(page * PAGE, page * PAGE + PAGE);
@@ -161,6 +166,7 @@ export default function ReviewPage() {
         <div className="controls">
           <input className="who-in" placeholder="your name" value={who} onChange={(e) => setWhoPersist(e.target.value)} />
           <input className="search" placeholder="search a bird…" value={q} onChange={(e) => setQ(e.target.value)} />
+          <label className="inapp"><input type="checkbox" checked={inApp} onChange={(e) => setInApp(e.target.checked)} /> In-app only</label>
           <div className="tabs">
             {TABS.map((t) => <button key={t} className={tab === t ? "on" : ""} onClick={() => setTab(t)}>{t}</button>)}
           </div>
@@ -192,6 +198,8 @@ const css = `
 .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .controls input{padding:8px 12px;border:1px solid #d6d0c3;border-radius:8px;background:#fff;font-size:14px}
 .who-in{width:140px}.search{flex:1;min-width:180px}
+.inapp{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#4a463c;padding:7px 10px;border:1px solid #d6d0c3;border-radius:8px;background:#fff;cursor:pointer;user-select:none}
+.inapp input{cursor:pointer}
 .tabs{display:flex;gap:4px;flex-wrap:wrap}
 .tabs button,.pager button{padding:8px 12px;border:1px solid #d6d0c3;background:#fff;border-radius:8px;cursor:pointer;font-size:13px}
 .tabs button.on{background:#2b2a26;color:#fff;border-color:#2b2a26}
