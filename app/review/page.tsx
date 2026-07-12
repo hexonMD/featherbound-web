@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 // Hidden plate-review gallery: every bird's illustration next to a real photo, with a shared
 // Checked / Failed status + notes per bird (stored server-side via /api/review). Not linked anywhere.
 
-type Bird = { s: string; n: string; sci?: string; t?: string; c?: number };
+type Bird = { s: string; n: string; sci?: string; t?: string; c?: number; d?: number };
 type Status = "checked" | "failed";
 type Entry = { status?: Status; note?: string; by?: string; at?: number };
 type State = Record<string, Entry>;
@@ -12,7 +12,7 @@ type State = Record<string, Entry>;
 const PLATE = (slug: string) =>
   `https://raw.githubusercontent.com/hexonMD/flock-plates/main/${slug}.png`;
 const PAGE = 48;
-const TABS = ["Suspicious", "Unchecked", "Checked", "Failed", "All"] as const;
+const TABS = ["In-App", "Suspicious", "Unchecked", "Checked", "Failed", "All"] as const;
 type Tab = (typeof TABS)[number];
 
 // iNat reference photo, fetched client-side by scientific name and cached in localStorage.
@@ -88,7 +88,7 @@ function Card({ bird, entry, who, onSet }: {
 export default function ReviewPage() {
   const [birds, setBirds] = useState<Bird[]>([]);
   const [state, setState] = useState<State>({});
-  const [tab, setTab] = useState<Tab>("Suspicious");
+  const [tab, setTab] = useState<Tab>("In-App");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(0);
   const [who, setWho] = useState("");
@@ -126,6 +126,7 @@ export default function ReviewPage() {
     const ql = q.trim().toLowerCase();
     return birds.filter((b) => {
       const st = state[b.s]?.status;
+      if (tab === "In-App" && !b.d) return false;
       if (tab === "Suspicious" && !(b.t && st !== "checked")) return false;
       if (tab === "Unchecked" && st) return false;
       if (tab === "Checked" && st !== "checked") return false;
