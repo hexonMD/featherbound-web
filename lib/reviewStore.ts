@@ -23,14 +23,27 @@ function endpoint() {
 }
 
 export async function getReviewState(): Promise<ReviewState> {
+  // Prefer the signed read (authoritative). If the R2 token is missing/denied (e.g. rotated key),
+  // fall back to the public bucket URL — the review bucket is public-read via R2_PUBLIC_BASE — so
+  // reporting can never be knocked out by a token issue.
   try {
     const res = await client().fetch(endpoint(), { method: "GET" });
     if (res.status === 404) return {};
-    if (!res.ok) throw new Error(`R2 GET ${res.status}`);
-    return (await res.json()) as ReviewState;
+    if (res.ok) return (await res.json()) as ReviewState;
   } catch {
-    return {};
+    // fall through to public read
   }
+  const pub = process.env.R2_PUBLIC_BASE;
+  if (pub) {
+    try {
+      const res = await fetch(`${pub}/${KEY}`, { cache: "no-store" });
+      if (res.status === 404) return {};
+      if (res.ok) return (await res.json()) as ReviewState;
+    } catch {
+      // fall through
+    }
+  }
+  return {};
 }
 
 export async function setReviewEntry(
