@@ -15,6 +15,13 @@ type PhotoMap = Record<string, Photo[]>;      // sci -> photos (missing key = no
 
 const PLATE = (b: Bird) =>
   `https://raw.githubusercontent.com/hexonMD/flock-plates/main/${b.s}.png${b.v ? `?v=${b.v}` : ""}`;
+// Reference-photo on-error: first failure retries through our server-side proxy (defeats hotlink /
+// referrer blocks); if the proxy also fails, run the caller's give-up handler.
+const PROXY = (url: string) => `/api/img?u=${encodeURIComponent(url)}`;
+function reproxy(img: HTMLImageElement, orig: string): boolean {
+  if (img.dataset.px) return false;            // already tried the proxy -> let caller give up
+  img.dataset.px = "1"; img.src = PROXY(orig); return true;
+}
 const PAGE = 36;
 const TABS = ["Suspicious", "Unchecked", "Checked", "Failed", "All"] as const;
 type Tab = (typeof TABS)[number];
@@ -49,7 +56,7 @@ function Card({ bird, photos, entry, who, onSet, onZoom }: {
             : photos.map((p, i) => (
               <figure key={i} className="ref" onClick={() => onZoom(p)}>
                 <img src={p.u} alt="reference" loading="lazy" referrerPolicy="no-referrer"
-                     onError={(e) => ((e.target as HTMLImageElement).closest("figure")!.style.display = "none")} />
+                     onError={(e) => { const img = e.currentTarget; if (!reproxy(img, p.u)) img.closest("figure")!.style.display = "none"; }} />
                 <figcaption>
                   {p.st ? <span className="st">{p.st}</span> : null}
                   <span className="cred">{p.a} · {p.l}</span>
