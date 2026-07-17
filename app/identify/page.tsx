@@ -127,6 +127,17 @@ export default function IdentifyPage() {
     }
   }
 
+  function reset() {
+    setFile(null);
+    setPreview("");
+    setRes(null);
+    setError("");
+    setFeedback("");
+    setCorrection("");
+    if (fileRef.current) fileRef.current.value = "";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   const top = res?.results[0];
 
   return (
@@ -192,6 +203,10 @@ export default function IdentifyPage() {
             ))}
           </div>
           <div className="id-plate-note">Reference: our illustrated field-guide plate</div>
+
+          <button type="button" className="cta ghost" onClick={reset} style={{ width: "100%", justifyContent: "center", marginTop: 18 }}>
+            📷 Identify another bird
+          </button>
           <div className="id-model">
             {res.region ? `${res.region} regional model` : "global model"} · location-aware
           </div>
