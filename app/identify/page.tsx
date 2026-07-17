@@ -180,35 +180,32 @@ export default function IdentifyPage() {
 
       {/* Results */}
       {res && top && (
-        <div className="id-card id-results">
-          {!res.bird_detected && <div className="id-hint" style={{ marginBottom: 12 }}>No clear bird outline found — identified from the whole photo, so this may be less certain.</div>}
-          <div className="id-top">
-            <img className="id-plate" src={plateUrl(top)} alt={`${top.common} field-guide plate`}
+        <div className="id-results">
+          {!res.bird_detected && <div className="id-hint" style={{ margin: "0 auto 14px" }}>No clear bird outline found — identified from the whole photo, so this may be less certain.</div>}
+
+          <div className="id-hero">
+            <div className="id-hero-badge">{top.pct}%</div>
+            <img className="id-hero-plate" src={plateUrl(top)} alt={`${top.common} field-guide plate`}
                  onError={(e) => ((e.currentTarget.style.display = "none"))} />
-            <div className="id-top-pct">{top.pct}%</div>
-            <div>
-              <div className="id-top-name">{top.common}</div>
-              <div className="id-top-sci">{top.sci}</div>
-            </div>
+            <div className="id-hero-name">{top.common}</div>
+            <div className="id-hero-sci">{top.sci}</div>
+            {!top.in_range && <div className="id-tag" style={{ marginTop: 10 }}>rare in your area</div>}
           </div>
-          <div className="id-others">
+
+          <div className="id-alt-label">Other possibilities</div>
+          <div className="id-grid">
             {res.results.slice(1).map((r) => (
-              <div key={r.sci} className="id-row">
-                <img className="id-plate-sm" src={plateUrl(r)} alt="" loading="lazy"
+              <div key={r.sci} className="id-mini">
+                <img className="id-mini-plate" src={plateUrl(r)} alt="" loading="lazy"
                      onError={(e) => ((e.currentTarget.style.visibility = "hidden"))} />
-                <span className="id-row-pct">{r.pct}%</span>
-                <span>{r.common}</span>
-                {!r.in_range && <span className="id-tag">rare here</span>}
+                <div className="id-mini-name">{r.common}</div>
+                <div className="id-mini-pct">{r.pct}%{!r.in_range && <span className="id-tag id-tag-sm">rare</span>}</div>
               </div>
             ))}
           </div>
-          <div className="id-plate-note">Reference: our illustrated field-guide plate</div>
 
-          <button type="button" className="cta ghost" onClick={reset} style={{ width: "100%", justifyContent: "center", marginTop: 18 }}>
-            📷 Identify another bird
-          </button>
           <div className="id-model">
-            {res.region ? `${res.region} regional model` : "global model"} · location-aware
+            {res.region ? `${res.region} regional model` : "global model"} · location-aware · reference art is our field-guide plates
           </div>
 
           {/* Feedback loop */}
@@ -226,6 +223,10 @@ export default function IdentifyPage() {
               <button type="button" className="cta ghost" style={{ padding: "8px 16px", fontSize: 15 }} onClick={() => setFeedback("correcting")}>✗ No</button>
             </div>
           )}
+
+          <button type="button" className="cta ghost" onClick={reset} style={{ width: "100%", justifyContent: "center", marginTop: 18 }}>
+            📷 Identify another bird
+          </button>
         </div>
       )}
     </main>
