@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 
 type Bird = { s: string; n: string; sci?: string; t?: string; c?: number; d?: number; v?: number };
 type Status = "checked" | "failed";
-type Entry = { status?: Status; note?: string; by?: string; at?: number };
+type Entry = { status?: Status; note?: string; by?: string; at?: number; source?: string; srcAt?: number };
 type State = Record<string, Entry>;
 type Photo = { u: string; a: string; l: string; s?: string; st?: string };
 type PhotoMap = Record<string, Photo[]>;      // sci -> photos (missing key = not yet fetched)
@@ -21,11 +21,12 @@ type Tab = (typeof TABS)[number];
 
 function Card({ bird, photos, entry, who, onSet, onZoom }: {
   bird: Bird; photos: Photo[] | undefined; entry: Entry | undefined; who: string;
-  onSet: (slug: string, patch: { status?: Status | null; note?: string }) => void;
+  onSet: (slug: string, patch: { status?: Status | null; note?: string; source?: string }) => void;
   onZoom: (p: Photo) => void;
 }) {
   const [note, setNote] = useState(entry?.note || "");
   const [saved, setSaved] = useState(false);
+  const [srcUrl, setSrcUrl] = useState("");
   useEffect(() => { setNote(entry?.note || ""); }, [entry?.note]);
   const status = entry?.status;
   const saveNote = () => {
@@ -69,6 +70,36 @@ function Card({ bird, photos, entry, who, onSet, onZoom }: {
       </div>
       <textarea className="note" placeholder="notes / what's wrong…" value={note}
                 onChange={(e) => setNote(e.target.value)} onBlur={saveNote} />
+
+      {status === "failed" && (
+        <div className="srcpick">
+          <div className="srclabel">Redraw source {entry?.source ? "· ✓ picked" : "— click a photo or paste a URL"}</div>
+          {photos && photos.length > 0 && (
+            <div className="srcopts">
+              {photos.map((p, i) => (
+                <button key={i} type="button" title="redraw the plate from this reference"
+                        className={`srcopt${entry?.source === p.u ? " on" : ""}`}
+                        onClick={() => onSet(bird.s, { source: p.u })}>
+                  <img src={p.u} alt="" referrerPolicy="no-referrer" />
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="srcurl">
+            <input placeholder="paste an Audubon plate / photo URL…" value={srcUrl}
+                   onChange={(e) => setSrcUrl(e.target.value)} />
+            <button type="button" disabled={!/^https?:\/\//i.test(srcUrl.trim())}
+                    onClick={() => { onSet(bird.s, { source: srcUrl.trim() }); setSrcUrl(""); }}>Use</button>
+          </div>
+          {entry?.source && (
+            <div className="srcset">
+              <img src={entry.source} alt="" referrerPolicy="no-referrer" />
+              <span>queued for redraw</span>
+              <button type="button" onClick={() => onSet(bird.s, { source: "" })}>clear</button>
+            </div>
+          )}
+        </div>
+      )}
       <div className="who">{saved ? "saved" : entry?.by ? `by ${entry.by}` : ""}</div>
     </div>
   );
@@ -105,12 +136,13 @@ export default function ReviewPage() {
 
   const setWhoPersist = (v: string) => { setWho(v); localStorage.setItem("fb_review_who", v); };
 
-  const onSet = useCallback((slug: string, patch: { status?: Status | null; note?: string }) => {
+  const onSet = useCallback((slug: string, patch: { status?: Status | null; note?: string; source?: string }) => {
     setState((prev) => {
       const cur = prev[slug] || {};
       const next: Entry = { ...cur, by: who || cur.by, at: Date.now() };
       if (patch.status !== undefined) { if (patch.status === null) delete next.status; else next.status = patch.status; }
       if (patch.note !== undefined) next.note = patch.note;
+      if (patch.source !== undefined) { if (!patch.source) { delete next.source; delete next.srcAt; } else { next.source = patch.source; next.srcAt = Date.now(); } }
       return { ...prev, [slug]: next };
     });
     queue.current = queue.current.then(() =>
@@ -263,6 +295,19 @@ const css = `
 .acts button.on.ok{background:#4f7a3f;border-color:#4f7a3f}
 .acts button.on.bad{background:#b4462f;border-color:#b4462f}
 .note{width:100%;min-height:38px;resize:vertical;border:1px solid #e2ddd0;border-radius:7px;padding:6px 8px;font-size:12px;font-family:inherit;background:#fff}
+.srcpick{border-top:1px dashed #e2ddd0;padding-top:8px;display:flex;flex-direction:column;gap:6px}
+.srclabel{font-size:11px;font-weight:600;color:#b4462f}
+.srcopts{display:flex;gap:5px;flex-wrap:wrap}
+.srcopt{padding:0;border:2px solid #d6d0c3;border-radius:6px;background:#fff;cursor:pointer;width:52px;height:52px;overflow:hidden}
+.srcopt img{width:100%;height:100%;object-fit:cover;display:block}
+.srcopt.on{border-color:#4f7a3f;box-shadow:0 0 0 2px #cfe3c2}
+.srcurl{display:flex;gap:5px}
+.srcurl input{flex:1;min-width:0;padding:5px 8px;border:1px solid #d6d0c3;border-radius:6px;font-size:11px;font-family:inherit}
+.srcurl button{padding:5px 10px;border:1px solid #4f7a3f;background:#4f7a3f;color:#fff;border-radius:6px;cursor:pointer;font-size:11px}
+.srcurl button:disabled{opacity:.5;cursor:default;background:#fff;color:#8a8474;border-color:#d6d0c3}
+.srcset{display:flex;align-items:center;gap:8px;font-size:11px;color:#4f7a3f}
+.srcset img{width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid #cfe3c2}
+.srcset button{margin-left:auto;padding:3px 8px;border:1px solid #d6d0c3;background:#fff;border-radius:6px;cursor:pointer;font-size:11px;color:#8a8474}
 .who{font-size:11px;color:#a49d8c;height:14px}
 .empty{text-align:center;color:#a49d8c;padding:40px}
 .pager{display:flex;justify-content:center;align-items:center;gap:16px;margin-top:24px;font-size:13px;color:#6b665c}

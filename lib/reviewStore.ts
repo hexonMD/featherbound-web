@@ -7,7 +7,11 @@ import { AwsClient } from "aws4fetch";
 const KEY = "plate-review/state.json";
 
 export type ReviewStatus = "checked" | "failed";
-export type ReviewEntry = { status?: ReviewStatus; note?: string; by?: string; at?: number };
+// `source` = a reviewer-picked reference image URL (an Audubon plate, an iNat photo, or a pasted URL)
+// to redraw the plate from; `srcAt` = when it was picked. The GPU-side regen consumer reads these.
+export type ReviewEntry = {
+  status?: ReviewStatus; note?: string; by?: string; at?: number; source?: string; srcAt?: number;
+};
 export type ReviewState = Record<string, ReviewEntry>;
 
 function client() {
@@ -48,7 +52,7 @@ export async function getReviewState(): Promise<ReviewState> {
 
 export async function setReviewEntry(
   slug: string,
-  patch: { status?: ReviewStatus | null; note?: string; by?: string },
+  patch: { status?: ReviewStatus | null; note?: string; by?: string; source?: string | null },
 ): Promise<ReviewEntry | null> {
   const state = await getReviewState();
   const next: ReviewEntry = { ...(state[slug] || {}) };
@@ -57,9 +61,13 @@ export async function setReviewEntry(
     else next.status = patch.status;
   }
   if (patch.note !== undefined) next.note = patch.note || undefined;
+  if (patch.source !== undefined) {
+    if (!patch.source) { delete next.source; delete next.srcAt; }
+    else { next.source = patch.source.slice(0, 1000); next.srcAt = Date.now(); }
+  }
   if (patch.by) next.by = patch.by;
   next.at = Date.now();
-  if (!next.status && !next.note) delete state[slug];
+  if (!next.status && !next.note && !next.source) delete state[slug];
   else state[slug] = next;
 
   const body = new TextEncoder().encode(JSON.stringify(state));
