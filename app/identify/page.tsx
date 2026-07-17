@@ -5,6 +5,28 @@ import { useRef, useState } from "react";
 type Result = { sci: string; common: string; pct: number; in_range: boolean };
 type IdResponse = { id: string; bird_detected: boolean; model_used: string; region: string | null; results: Result[] };
 
+// Phone photos are often 10-40 MB. The model only ever sees a small crop, so downscale to a max edge
+// client-side (also applies EXIF orientation so the bird isn't sideways) — fast upload, no size errors.
+async function downscale(file: File, maxEdge = 1600): Promise<Blob> {
+  try {
+    const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const scale = Math.min(1, maxEdge / Math.max(bmp.width, bmp.height));
+    const w = Math.round(bmp.width * scale);
+    const h = Math.round(bmp.height * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(bmp, 0, 0, w, h);
+    bmp.close();
+    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.85));
+    return blob ?? file;
+  } catch {
+    return file;
+  }
+}
+
 export default function IdentifyPage() {
   const [lat, setLat] = useState<string>("");
   const [lon, setLon] = useState<string>("");
@@ -56,8 +78,9 @@ export default function IdentifyPage() {
     setRes(null);
     setFeedback("");
     try {
+      const blob = await downscale(file);
       const fd = new FormData();
-      fd.set("file", file);
+      fd.set("file", blob, "photo.jpg");
       fd.set("lat", lat);
       fd.set("lon", lon);
       const r = await fetch("/api/identify", { method: "POST", body: fd });
