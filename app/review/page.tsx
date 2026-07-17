@@ -291,8 +291,8 @@ const css = `
 .plate img{width:100%;height:190px;object-fit:contain;background:#f6f3ea;border-radius:8px}
 .plate figcaption{font-size:10px;color:#a49d8c;margin-top:3px;text-transform:uppercase;letter-spacing:.05em}
 .refhead{font-size:12px;color:#6b665c;font-weight:600}
-.refs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.ref{margin:0;cursor:zoom-in;display:flex;flex-direction:column}
+.refs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.ref{margin:0;cursor:zoom-in;display:flex;flex-direction:column;min-width:0}
 .ref img{width:100%;height:84px;object-fit:cover;background:#f0ece1;border-radius:6px;display:block}
 .ref figcaption{font-size:9px;color:#8a8474;margin-top:2px;line-height:1.25;display:flex;flex-direction:column;gap:1px}
 .ref .st{display:inline-block;text-transform:uppercase;letter-spacing:.04em;color:#4f7a3f;font-weight:700}
