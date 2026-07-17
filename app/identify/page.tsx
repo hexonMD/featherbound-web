@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Result = { sci: string; common: string; pct: number; in_range: boolean };
 type IdResponse = { id: string; bird_detected: boolean; model_used: string; region: string | null; results: Result[] };
@@ -38,7 +38,26 @@ export default function IdentifyPage() {
   const [error, setError] = useState<string>("");
   const [feedback, setFeedback] = useState<"" | "thanks" | "correcting">("");
   const [correction, setCorrection] = useState("");
+  const [slugMap, setSlugMap] = useState<Record<string, string>>({});
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Map scientific name -> plate slug so we can show our own clean field-guide illustration for each
+  // result (never iNat/other photos on the public page — clean-licensed art only).
+  useEffect(() => {
+    fetch("/review-birds.json")
+      .then((r) => r.json())
+      .then((d: { s: string; sci?: string }[]) => {
+        const m: Record<string, string> = {};
+        for (const b of d) if (b.sci) m[b.sci] = b.s;
+        setSlugMap(m);
+      })
+      .catch(() => {});
+  }, []);
+
+  const plateUrl = (r: Result) => {
+    const slug = slugMap[r.sci] ?? r.common.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    return `https://raw.githubusercontent.com/hexonMD/flock-plates/main/${slug}.png`;
+  };
 
   function useMyLocation() {
     setLocLabel("locating…");
@@ -153,6 +172,8 @@ export default function IdentifyPage() {
         <div className="id-card id-results">
           {!res.bird_detected && <div className="id-hint" style={{ marginBottom: 12 }}>No clear bird outline found — identified from the whole photo, so this may be less certain.</div>}
           <div className="id-top">
+            <img className="id-plate" src={plateUrl(top)} alt={`${top.common} field-guide plate`}
+                 onError={(e) => ((e.currentTarget.style.display = "none"))} />
             <div className="id-top-pct">{top.pct}%</div>
             <div>
               <div className="id-top-name">{top.common}</div>
@@ -162,12 +183,15 @@ export default function IdentifyPage() {
           <div className="id-others">
             {res.results.slice(1).map((r) => (
               <div key={r.sci} className="id-row">
+                <img className="id-plate-sm" src={plateUrl(r)} alt="" loading="lazy"
+                     onError={(e) => ((e.currentTarget.style.visibility = "hidden"))} />
                 <span className="id-row-pct">{r.pct}%</span>
                 <span>{r.common}</span>
                 {!r.in_range && <span className="id-tag">rare here</span>}
               </div>
             ))}
           </div>
+          <div className="id-plate-note">Reference: our illustrated field-guide plate</div>
           <div className="id-model">
             {res.region ? `${res.region} regional model` : "global model"} · location-aware
           </div>
