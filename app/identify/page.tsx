@@ -112,7 +112,7 @@ export default function IdentifyPage() {
 
         {/* Photo */}
         <label className="id-label" style={{ marginTop: 22 }}>2 · Your bird photo</label>
-        <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={onPick} hidden />
+        <input ref={fileRef} type="file" accept="image/*" onChange={onPick} hidden />
         <button type="button" className="id-drop" onClick={() => fileRef.current?.click()}>
           {preview ? <img src={preview} alt="your bird" className="id-preview" /> : <span>📷 Tap to take or choose a photo</span>}
         </button>
