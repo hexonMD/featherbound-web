@@ -243,7 +243,6 @@ export default function IdentifyPage() {
                  onError={(e) => ((e.currentTarget.style.display = "none"))} />
             <div className="id-hero-name">{top.common}</div>
             <div className="id-hero-sci">{top.sci}</div>
-            {res.sex_age && <div className="id-sexage">likely {res.sex_age.label} · {res.sex_age.pct}%</div>}
             {!top.in_range && <div className="id-tag" style={{ marginTop: 10 }}>rare in your area</div>}
           </div>
 
