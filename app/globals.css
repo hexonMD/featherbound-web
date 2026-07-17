@@ -210,3 +210,4 @@ img { max-width: 100%; display: block; }
 .id-mini-name { font-size: 16px; line-height: 1.15; text-wrap: balance; }
 .id-mini-pct { font-size: 13px; color: var(--ink-2); margin-top: 4px; font-variant-numeric: tabular-nums; }
 .id-tag-sm { font-size: 10px; margin-left: 6px; padding: 1px 6px; }
+.id-sexage { display: inline-block; margin-top: 10px; font-size: 15px; color: var(--clay); background: rgba(142,59,47,.08); border: 1px solid rgba(142,59,47,.25); border-radius: 999px; padding: 4px 14px; text-transform: capitalize; }

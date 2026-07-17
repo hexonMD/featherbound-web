@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 
 type Result = { sci: string; common: string; pct: number; in_range: boolean };
-type IdResponse = { id: string; bird_detected: boolean; model_used: string; region: string | null; results: Result[] };
+type SexAge = { label: string; pct: number };
+type IdResponse = { id: string; bird_detected: boolean; model_used: string; region: string | null; sex_age: SexAge | null; results: Result[] };
 
 // Phone photos are often 10-40 MB. The model only ever sees a small crop, so downscale to a max edge
 // client-side (also applies EXIF orientation so the bird isn't sideways) — fast upload, no size errors.
@@ -202,6 +203,7 @@ export default function IdentifyPage() {
                  onError={(e) => ((e.currentTarget.style.display = "none"))} />
             <div className="id-hero-name">{top.common}</div>
             <div className="id-hero-sci">{top.sci}</div>
+            {res.sex_age && <div className="id-sexage">likely {res.sex_age.label} · {res.sex_age.pct}%</div>}
             {!top.in_range && <div className="id-tag" style={{ marginTop: 10 }}>rare in your area</div>}
           </div>
 
