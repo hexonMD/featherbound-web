@@ -124,6 +124,9 @@ export default function ReviewPage() {
   const [who, setWho] = useState("");
   const [ready, setReady] = useState(false);
   const [zoom, setZoom] = useState<Photo | null>(null);
+  // Cards you just touched stay visible even after their status stops matching the current tab, so
+  // flagging Failed doesn't yank the card away before you can add a note / pick a redraw source.
+  const [stuck, setStuck] = useState<Set<string>>(() => new Set());
   const queue = useRef<Promise<void>>(Promise.resolve());
   const requested = useRef<Set<string>>(new Set());
 
@@ -152,6 +155,7 @@ export default function ReviewPage() {
       if (patch.source !== undefined) { if (!patch.source) { delete next.source; delete next.srcAt; } else { next.source = patch.source; next.srcAt = Date.now(); } }
       return { ...prev, [slug]: next };
     });
+    setStuck((s) => (s.has(slug) ? s : new Set(s).add(slug)));   // keep this card in view after status change
     queue.current = queue.current.then(() =>
       fetch("/api/review", {
         method: "POST", headers: { "content-type": "application/json" },
@@ -170,17 +174,18 @@ export default function ReviewPage() {
     const ql = q.trim().toLowerCase();
     return scoped.filter((b) => {
       const st = state[b.s]?.status;
+      if (ql && !b.n.toLowerCase().includes(ql) && !(b.sci || "").toLowerCase().includes(ql)) return false;
       if (flaggedOnly && !b.d) return false;
+      if (stuck.has(b.s)) return true;   // just-touched this card — keep it in view regardless of tab
       if (tab === "Suspicious" && !(b.t && st !== "checked")) return false;
       if (tab === "Unchecked" && st) return false;
       if (tab === "Checked" && st !== "checked") return false;
       if (tab === "Failed" && st !== "failed") return false;
-      if (ql && !b.n.toLowerCase().includes(ql) && !(b.sci || "").toLowerCase().includes(ql)) return false;
       return true;
     });
-  }, [scoped, state, tab, q, flaggedOnly]);
+  }, [scoped, state, tab, q, flaggedOnly, stuck]);
 
-  useEffect(() => { setPage(0); }, [tab, q, flaggedOnly]);
+  useEffect(() => { setPage(0); setStuck(new Set()); }, [tab, q, flaggedOnly]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
   const slice = useMemo(() => filtered.slice(page * PAGE, page * PAGE + PAGE), [filtered, page]);
