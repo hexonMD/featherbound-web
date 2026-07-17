@@ -47,7 +47,7 @@ function Card({ bird, photos, entry, who, onSet, onZoom }: {
           : photos.length === 0 ? <div className="ph">no photo</div>
             : photos.map((p, i) => (
               <figure key={i} className="ref" onClick={() => onZoom(p)}>
-                <img src={p.u} alt="reference" loading="lazy"
+                <img src={p.u} alt="reference" loading="lazy" referrerPolicy="no-referrer"
                      onError={(e) => ((e.target as HTMLImageElement).closest("figure")!.style.display = "none")} />
                 <figcaption>
                   {p.st ? <span className="st">{p.st}</span> : null}
@@ -211,7 +211,7 @@ export default function ReviewPage() {
       {zoom && (
         <div className="lb" onClick={() => setZoom(null)}>
           <div className="lbinner" onClick={(e) => e.stopPropagation()}>
-            <img src={zoom.u} alt="reference" />
+            <img src={zoom.u} alt="reference" referrerPolicy="no-referrer" />
             <div className="lbcred">{zoom.a} · {zoom.l}{zoom.st ? ` · ${zoom.st}` : ""}</div>
             <button className="lbclose" onClick={() => setZoom(null)}>Close</button>
           </div>
