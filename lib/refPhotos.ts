@@ -57,20 +57,24 @@ async function fromINat(sci: string): Promise<RefPhoto[]> {
         signal: AbortSignal.timeout(7000),
       }).then((r) => r.json());
       const tp = dr?.results?.[0]?.taxon_photos || [];
-      out = tp
+      out = (tp
         .map((x: { photo?: { medium_url?: string; url?: string; attribution?: string; license_code?: string } }) => {
           const ph = x.photo || {};
           const u = ph.medium_url || ph.url;
           if (!u) return null;
-          return { u, a: cleanAttr(ph.attribution), l: licLabel(ph.license_code), s: "inat" } as RefPhoto;
+          const l = licLabel(ph.license_code);
+          if (!l.startsWith("CC")) return null;   // drop all-rights-reserved / unlicensed
+          return { u, a: cleanAttr(ph.attribution), l, s: "inat" } as RefPhoto;
         })
-        .filter(Boolean) as RefPhoto[];
+        .filter(Boolean) as RefPhoto[]);
       // non-commercial last (still shown — this is QA, not distribution)
       out.sort((a, b) => (a.l.includes("NC") ? 1 : 0) - (b.l.includes("NC") ? 1 : 0));
       out = out.slice(0, 6);
       if (out.length === 0 && t.default_photo?.medium_url) {
-        out = [{ u: t.default_photo.medium_url, a: cleanAttr(t.default_photo.attribution),
-                 l: licLabel(t.default_photo.license_code), s: "inat" }];
+        const dl = licLabel(t.default_photo.license_code);
+        if (dl.startsWith("CC")) {
+          out = [{ u: t.default_photo.medium_url, a: cleanAttr(t.default_photo.attribution), l: dl, s: "inat" }];
+        }
       }
     }
   } catch {
