@@ -76,7 +76,7 @@ export default function IdentifyPage() {
     );
   }
 
-  function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
     setFile(f);
@@ -84,6 +84,19 @@ export default function IdentifyPage() {
     setRes(null);
     setError("");
     setFeedback("");
+    // Pull GPS straight off the photo's EXIF (before downscaling strips it) so the user usually
+    // doesn't have to enter a location at all. Silent no-op if the photo has no geotag.
+    try {
+      const exifr = (await import("exifr")).default;
+      const gps = await exifr.gps(f);
+      if (gps && Number.isFinite(gps.latitude) && Number.isFinite(gps.longitude)) {
+        setLat(gps.latitude.toFixed(4));
+        setLon(gps.longitude.toFixed(4));
+        setLocLabel("📷 location read from your photo");
+      }
+    } catch {
+      /* no EXIF / unreadable — fall back to manual or "Use my location" */
+    }
   }
 
   async function identify() {
@@ -146,8 +159,8 @@ export default function IdentifyPage() {
         <span className="hero-badge">Live model · beta</span>
         <h1 style={{ fontSize: "clamp(34px,6vw,52px)", lineHeight: 1.04 }}>Identify a bird</h1>
         <p style={{ color: "var(--ink-2)", maxWidth: 560, margin: "16px auto 0", fontSize: 18, lineHeight: 1.5 }}>
-          Upload a photo and tell us roughly where you are. Our new field-guide model narrows to the birds
-          of your region and names it.
+          Upload a bird photo — we read the location right off it when it's geotagged (or set it yourself),
+          then our new field-guide model narrows to the birds of your region and names it.
         </p>
       </section>
 
