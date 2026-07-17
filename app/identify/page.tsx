@@ -40,7 +40,38 @@ export default function IdentifyPage() {
   const [feedback, setFeedback] = useState<"" | "thanks" | "correcting">("");
   const [correction, setCorrection] = useState("");
   const [slugMap, setSlugMap] = useState<Record<string, string>>({});
+  const [place, setPlace] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  async function reverseGeocode(la: string, lo: string) {
+    try {
+      const r = await fetch(`/api/geocode?mode=reverse&lat=${la}&lon=${lo}`);
+      const j = await r.json();
+      if (j.place) setPlace(j.place);
+    } catch {
+      /* keep coords silently */
+    }
+  }
+
+  async function forwardGeocode() {
+    const q = place.trim();
+    if (!q) return;
+    setLocLabel("finding place…");
+    try {
+      const r = await fetch(`/api/geocode?mode=forward&q=${encodeURIComponent(q)}`);
+      const j = await r.json();
+      if (r.ok && Number.isFinite(j.lat) && Number.isFinite(j.lon)) {
+        setLat(j.lat.toFixed(4));
+        setLon(j.lon.toFixed(4));
+        setPlace(j.place || q);
+        setLocLabel("");
+      } else {
+        setLocLabel("couldn't find that place — try 'City, Country'");
+      }
+    } catch {
+      setLocLabel("couldn't reach the map service");
+    }
+  }
 
   // Map scientific name -> plate slug so we can show our own clean field-guide illustration for each
   // result (never iNat/other photos on the public page — clean-licensed art only).
@@ -68,11 +99,14 @@ export default function IdentifyPage() {
     }
     navigator.geolocation.getCurrentPosition(
       (p) => {
-        setLat(p.coords.latitude.toFixed(4));
-        setLon(p.coords.longitude.toFixed(4));
-        setLocLabel("using your location");
+        const la = p.coords.latitude.toFixed(4);
+        const lo = p.coords.longitude.toFixed(4);
+        setLat(la);
+        setLon(lo);
+        setLocLabel("");
+        reverseGeocode(la, lo);
       },
-      () => setLocLabel("couldn't get location — enter it below"),
+      () => setLocLabel("couldn't get location — type it below"),
       { enableHighAccuracy: false, timeout: 8000 }
     );
   }
@@ -91,9 +125,12 @@ export default function IdentifyPage() {
       const exifr = (await import("exifr")).default;
       const gps = await exifr.gps(f);
       if (gps && Number.isFinite(gps.latitude) && Number.isFinite(gps.longitude)) {
-        setLat(gps.latitude.toFixed(4));
-        setLon(gps.longitude.toFixed(4));
+        const la = gps.latitude.toFixed(4);
+        const lo = gps.longitude.toFixed(4);
+        setLat(la);
+        setLon(lo);
         setLocLabel("📷 location read from your photo");
+        reverseGeocode(la, lo);
       }
     } catch {
       /* no EXIF / unreadable — fall back to manual or "Use my location" */
@@ -172,9 +209,12 @@ export default function IdentifyPage() {
           <button type="button" className="cta ghost" onClick={useMyLocation} style={{ padding: "11px 18px", fontSize: 15 }}>
             📍 Use my location
           </button>
-          <input className="id-input" inputMode="decimal" placeholder="latitude" value={lat} onChange={(e) => setLat(e.target.value)} />
-          <input className="id-input" inputMode="decimal" placeholder="longitude" value={lon} onChange={(e) => setLon(e.target.value)} />
+          <input className="id-input" placeholder="or type a place — e.g. Victoria, Canada" value={place}
+                 onChange={(e) => setPlace(e.target.value)} onBlur={forwardGeocode}
+                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLInputElement).blur(); } }}
+                 style={{ flexBasis: "100%" }} />
         </div>
+        {lat && lon && place && !locLabel && <div className="id-hint">📍 {place}</div>}
         {locLabel && <div className="id-hint">{locLabel}</div>}
 
         {/* Photo */}
@@ -207,17 +247,26 @@ export default function IdentifyPage() {
             {!top.in_range && <div className="id-tag" style={{ marginTop: 10 }}>rare in your area</div>}
           </div>
 
-          <div className="id-alt-label">Other possibilities</div>
-          <div className="id-grid">
-            {res.results.slice(1).map((r) => (
-              <div key={r.sci} className="id-mini">
-                <img className="id-mini-plate" src={plateUrl(r)} alt="" loading="lazy"
-                     onError={(e) => ((e.currentTarget.style.visibility = "hidden"))} />
-                <div className="id-mini-name">{r.common}</div>
-                <div className="id-mini-pct">{r.pct}%{!r.in_range && <span className="id-tag id-tag-sm">rare</span>}</div>
-              </div>
-            ))}
-          </div>
+          {(() => {
+            const alts = res.results.slice(1).filter((r) => r.pct >= 1);
+            if (!alts.length)
+              return <div className="id-confident">High confidence — no close alternatives.</div>;
+            return (
+              <>
+                <div className="id-alt-label">Other possibilities</div>
+                <div className="id-grid">
+                  {alts.map((r) => (
+                    <div key={r.sci} className="id-mini">
+                      <img className="id-mini-plate" src={plateUrl(r)} alt="" loading="lazy"
+                           onError={(e) => ((e.currentTarget.style.visibility = "hidden"))} />
+                      <div className="id-mini-name">{r.common}</div>
+                      <div className="id-mini-pct">{r.pct}%{!r.in_range && <span className="id-tag id-tag-sm">rare</span>}</div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            );
+          })()}
 
           <div className="id-model">
             {res.region ? `${res.region} regional model` : "global model"} · location-aware · reference art is our field-guide plates
