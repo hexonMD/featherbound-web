@@ -34,13 +34,13 @@ export default function Home() {
           </p>
           <div className="grid3 shots">
             <div className="card shot">
-              <div className="phone"><img src="/screen-match.png" alt="FeatherBound naming a photographed bird — a 97% match to a Steller's Jay" /></div>
+              <div className="phone"><img src="/screen-match.png" alt="FeatherBound revealing a caught bird as an illustrated field-guide card — a legendary Great Horned Owl at a 94% match" /></div>
               <h3>Spot &amp; reveal</h3>
               <p>Photo or birdsong — identified on-device, then revealed as an illustrated card with a little ceremony.</p>
             </div>
             <div className="card shot">
-              <div className="phone"><img src="/screen-dex.png" alt="The BirdDex — every species, greyed until you find it" /></div>
-              <h3>Your BirdDex</h3>
+              <div className="phone"><img src="/screen-dex.png" alt="The Field Guide — every species, greyed until you find it" /></div>
+              <h3>Your field guide</h3>
               <p>Every species, greyed until you find it — then it turns to full colour. Rarity, range and season on every page.</p>
             </div>
             <div className="card shot">
