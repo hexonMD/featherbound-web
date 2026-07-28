@@ -34,7 +34,7 @@ export default function Home() {
           </p>
           <div className="grid3 shots">
             <div className="card shot">
-              <div className="phone"><img src="/screen-match.png" alt="FeatherBound revealing a caught bird as an illustrated field-guide card — a legendary Great Horned Owl at a 94% match" /></div>
+              <div className="phone"><img src="/screen-match.png" alt="FeatherBound revealing a caught bird as an illustrated field-guide card — a Steller's Jay at a 97% match" /></div>
               <h3>Spot &amp; reveal</h3>
               <p>Photo or birdsong — identified on-device, then revealed as an illustrated card with a little ceremony.</p>
             </div>
