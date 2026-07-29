@@ -76,6 +76,27 @@ export async function recordRequest(input: {
   return (await res.json())[0] as BirdRequest;
 }
 
+/** Best-effort: stash the finder's catch of an off-catalog species (keyed user_id+species_sci) so it can
+ *  be linked into their collection once the plate goes live. The reconcile that mints a real card is
+ *  gated on the species existing in the catalog (the auto-add pipeline) — this just preserves the claim. */
+export async function recordPendingCatch(input: {
+  user_id: string; species_sci: string; common_name?: string | null;
+  photo_url?: string | null; region?: string | null;
+}): Promise<void> {
+  const row = {
+    user_id: input.user_id,
+    species_sci: input.species_sci.trim(),
+    common_name: input.common_name ?? null,
+    photo_url: input.photo_url ?? null,
+    region: input.region ?? null,
+  };
+  await fetch(`${SUPABASE_URL}/rest/v1/pending_catches`, {
+    method: "POST",
+    headers: headers({ Prefer: "resolution=merge-duplicates,return=minimal" }),
+    body: JSON.stringify(row),
+  });
+}
+
 export async function getRequest(sci: string): Promise<BirdRequest | null> {
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/bird_requests?species_sci=eq.${encodeURIComponent(sci.trim())}&limit=1`,

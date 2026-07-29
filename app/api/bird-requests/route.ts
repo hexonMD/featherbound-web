@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  recordRequest, listRequests, updateRequest, REQUESTS_CONFIGURED, type RequestStatus,
+  recordRequest, recordPendingCatch, listRequests, updateRequest, REQUESTS_CONFIGURED, type RequestStatus,
 } from "@/lib/birdRequests";
 
 export const runtime = "nodejs";
@@ -31,14 +31,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "species_sci required" }, { status: 400 });
   }
   const s = (v: unknown, n = 200) => (typeof v === "string" ? v.slice(0, n) : undefined);
+  const uid = s(body.user_id, 120);
+  const common = s(body.common_name, 120) ?? null;
+  const region = s(body.region, 160) ?? null;
+  const photo = /^https?:\/\//i.test(String(body.sample_photo_url ?? "")) ? String(body.sample_photo_url) : null;
   try {
-    const row = await recordRequest({
-      species_sci,
-      common_name: s(body.common_name, 120) ?? null,
-      user_id: s(body.user_id, 120) ?? null,
-      sample_photo_url: /^https?:\/\//i.test(String(body.sample_photo_url ?? "")) ? String(body.sample_photo_url) : null,
-      region: s(body.region, 160) ?? null,
-    });
+    const row = await recordRequest({ species_sci, common_name: common, user_id: uid ?? null, sample_photo_url: photo, region });
+    // Preserve the finder's catch so it can drop into their collection once the plate is live.
+    if (uid) {
+      try { await recordPendingCatch({ user_id: uid, species_sci, common_name: common, photo_url: photo, region }); }
+      catch { /* best-effort; the request itself is what matters */ }
+    }
     return NextResponse.json({ ok: true, request: row });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
