@@ -7,6 +7,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const IDENTIFY_KEY = process.env.IDENTIFY_KEY || "";   // app-facing bearer (same one /api/identify uses)
+const REQUEST_KEY = process.env.REQUEST_KEY || "";     // the iOS app's vision key (fbv_…) — it already holds this
+const APP_KEYS = new Set([IDENTIFY_KEY, REQUEST_KEY].filter(Boolean));  // any accepted for a user request POST
 const ADMIN_KEY = process.env.ADMIN_KEY || "";         // dashboard mutations; reads stay open (internal tool)
 const STATUSES = new Set<RequestStatus>(["requested", "generating", "in_review", "live", "rejected"]);
 
@@ -20,7 +22,7 @@ export async function POST(req: NextRequest) {
   if (!REQUESTS_CONFIGURED) {
     return NextResponse.json({ error: "requests not configured (SUPABASE_SERVICE_KEY missing)" }, { status: 503 });
   }
-  if (IDENTIFY_KEY && bearer(req) !== IDENTIFY_KEY) {
+  if (APP_KEYS.size && !APP_KEYS.has(bearer(req))) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const body = await req.json().catch(() => ({} as Record<string, unknown>));
