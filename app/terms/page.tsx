@@ -8,7 +8,7 @@ export default function Terms() {
     <main className="prose">
       <a className="back" href="/">← FeatherBound</a>
       <h1>Terms of Use</h1>
-      <p className="updated">Last updated: July 2026</p>
+      <p className="updated">Last updated: October 2026</p>
 
       <p>By using FeatherBound — the app or this website — you agree to these terms.</p>
 
@@ -24,6 +24,21 @@ export default function Terms() {
       <p>
         Photos and recordings you capture are yours. When you share a catch with friends or a
         league, you grant us a licence to store and display it to those people for that purpose.
+      </p>
+
+      <h2>Behaviour and objectionable content</h2>
+      <p>
+        We have zero tolerance for objectionable content or abusive users. Don&rsquo;t post or
+        send anything harassing, hateful, threatening, sexual, violent or otherwise offensive, and
+        don&rsquo;t impersonate anyone. You can report any user or message, and block anyone, from
+        their profile or the chat menu. We review every report within 24 hours, remove content
+        that breaks these terms and ban the accounts responsible.
+      </p>
+
+      <h2>Deleting your account</h2>
+      <p>
+        You can delete your account at any time in the app: Profile, then Delete account. This
+        permanently removes your profile, friends, messages and synced cards from our servers.
       </p>
 
       <h2>Helping improve identification (optional)</h2>
