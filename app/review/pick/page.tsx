@@ -293,7 +293,7 @@ export default function PickPage() {
                   <button className="pickbtn" onClick={() => choose(c.id)} title={`pick candidate ${i + 1} (${c.prompt_variant}, seed ${c.seed})`}>
                     <img src={c.url} alt={`candidate ${i + 1}`} />
                     <span className="num">{i + 1}</span>
-                    <span className="var">{c.prompt_variant === "marks" ? "field marks" : "plain"}</span>
+                    <span className="var">{c.prompt_variant.endsWith("marks") ? "field marks" : "plain"}</span>
                     {entry?.pick === c.id && <span className="chk">✓ picked</span>}
                   </button>
                   <button className="zoombtn" aria-label="enlarge" onClick={() => setZoom({ src: c.url, label: `Candidate ${i + 1}`, cand: i })}>⤢</button>
