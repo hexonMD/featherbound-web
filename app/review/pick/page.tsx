@@ -325,6 +325,7 @@ const css = `
 .pk .refs .ph{grid-column:1/-1;height:70px;display:flex;align-items:center;justify-content:center;background:#f0ece1;border-radius:6px;color:#a49d8c;font-size:12px}
 .pk .refcap{font-size:11px;color:#a49d8c}
 .pk .cands{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (min-width:821px){.pk .cands{max-width:max(560px,calc((100vh - 400px) * 1.5 + 20px))}}
 .pk .cand{position:relative;min-width:0}
 .pk .pickbtn{display:block;width:100%;padding:0;border:3px solid #e2ddd0;border-radius:12px;background:#fff;cursor:pointer;overflow:hidden;position:relative;transition:border-color .12s,box-shadow .12s}
 .pk .pickbtn:hover{border-color:#b9b09a}
