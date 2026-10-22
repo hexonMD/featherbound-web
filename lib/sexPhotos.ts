@@ -13,7 +13,7 @@ function attr(s: string | undefined): string {
   if (!s) return "iNaturalist";
   const m = s.match(/(?:\(c\)|©)?\s*([^,]+?),?\s*(?:some|all|no) rights/i);
   const out = (m ? m[1] : s).replace(/^\(c\)\s*/i, "").trim();
-  return out && !/^no$/i.test(out) ? out : "iNaturalist";
+  return out && !/^no(\s+rights.*)?$/i.test(out) ? out : "iNaturalist";
 }
 
 async function bySex(sci: string, value: 10 | 11): Promise<RefPhoto[]> {
