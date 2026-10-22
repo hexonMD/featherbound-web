@@ -16,7 +16,14 @@ export type PickValue = string; // candidate id | "current" | "none"
 export type ReviewEntry = {
   status?: ReviewStatus; note?: string; by?: string; at?: number; source?: string; srcAt?: number;
   pick?: PickValue; pickNote?: string; pickBy?: string; pickAt?: number;
+  // M/F labelling (/review/sex): what the CURRENT plate shows. m = male, f = female,
+  // s = sexes look the same (not really dimorphic), x = wrong / mixed.
+  sex?: SexLabel; sexBy?: string; sexAt?: number;
+  // Female lane of pick mode: same semantics as pick/pickNote but over the female candidates
+  // (plate-candidates/female-manifest.json); "current" = keep the existing <slug>-female.png.
+  fpick?: PickValue; fpickNote?: string; fpickBy?: string; fpickAt?: number;
 };
+export type SexLabel = "m" | "f" | "s" | "x";
 export type ReviewState = Record<string, ReviewEntry>;
 
 function client() {
@@ -60,6 +67,7 @@ export async function setReviewEntry(
   patch: {
     status?: ReviewStatus | null; note?: string; by?: string; source?: string | null;
     pick?: PickValue | null; pickNote?: string;
+    sex?: SexLabel | null; fpick?: PickValue | null; fpickNote?: string;
   },
 ): Promise<ReviewEntry | null> {
   const state = await getReviewState();
@@ -74,6 +82,20 @@ export async function setReviewEntry(
     if (patch.by) next.pickBy = patch.by;
     next.pickAt = Date.now();
   }
+  if (patch.sex !== undefined) {
+    if (!patch.sex) { delete next.sex; delete next.sexBy; delete next.sexAt; }
+    else { next.sex = patch.sex; if (patch.by) next.sexBy = patch.by; next.sexAt = Date.now(); }
+  }
+  const isFpick = patch.fpick !== undefined || patch.fpickNote !== undefined;
+  if (patch.fpick !== undefined) {
+    if (!patch.fpick) { delete next.fpick; delete next.fpickNote; delete next.fpickBy; delete next.fpickAt; }
+    else next.fpick = patch.fpick.slice(0, 40);
+  }
+  if (patch.fpickNote !== undefined) next.fpickNote = patch.fpickNote || undefined;
+  if (isFpick && next.fpick) {
+    if (patch.by) next.fpickBy = patch.by;
+    next.fpickAt = Date.now();
+  }
   if (patch.status !== undefined) {
     if (patch.status === null) delete next.status;
     else next.status = patch.status;
@@ -84,11 +106,12 @@ export async function setReviewEntry(
     else { next.source = patch.source.slice(0, 1000); next.srcAt = Date.now(); }
   }
   const isReview = patch.status !== undefined || patch.note !== undefined || patch.source !== undefined;
-  if (isReview || !isPick) {
+  if (isReview || !(isPick || isFpick || patch.sex !== undefined)) {
     if (patch.by) next.by = patch.by;
     next.at = Date.now();
   }
-  if (!next.status && !next.note && !next.source && !next.pick && !next.pickNote) delete state[slug];
+  if (!next.status && !next.note && !next.source && !next.pick && !next.pickNote && !next.sex
+      && !next.fpick && !next.fpickNote) delete state[slug];
   else state[slug] = next;
 
   const body = new TextEncoder().encode(JSON.stringify(state));

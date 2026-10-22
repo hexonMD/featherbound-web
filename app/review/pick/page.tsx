@@ -5,12 +5,22 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 // (fb-distill/gen_candidates.py -> plate-candidates/manifest.json on R2): the shipped plate, real
 // reference photos, and the candidate grid. Pick one, keep the current plate, or mark "none close".
 // Picks live in the same shared R2 review blob as /review (pick / pickNote / pickBy / pickAt fields).
+// Two lanes: "main" (the shipped plate; pick/pickNote fields) and "female" (?lane=female: female
+// candidates from plate-candidates/female-manifest.json vs the existing <slug>-female.png, with
+// sex-annotated female photos; fpick/fpickNote fields).
 // Keyboard: 1-6 pick · k keep current · n none close · ← → species · z zoom · Esc close.
 
-type Bird = { s: string; n: string; sci?: string; v?: number };
+type Bird = { s: string; n: string; sci?: string; v?: number; fe?: number; fp?: string };
+type Lane = "main" | "female";
 type Cand = { id: string; url: string; seed: number; prompt_variant: string; model: string; ref?: string };
 type Manifest = { meta: { model?: string; updated?: number; count?: number } | null; species: Record<string, Cand[]> };
-type Entry = { status?: string; note?: string; pick?: string; pickNote?: string; pickBy?: string; pickAt?: number };
+type Entry = {
+  status?: string; note?: string; pick?: string; pickNote?: string; pickBy?: string; pickAt?: number;
+  fpick?: string; fpickNote?: string; fpickBy?: string; fpickAt?: number;
+};
+// Present the active lane's fields as pick/pickNote/pickBy/pickAt so the rest of the page is lane-agnostic.
+const view = (e: Entry | undefined, lane: Lane): Entry | undefined =>
+  !e || lane === "main" ? e : { pick: e.fpick, pickNote: e.fpickNote, pickBy: e.fpickBy, pickAt: e.fpickAt };
 type State = Record<string, Entry>;
 type Photo = { u: string; a: string; l: string; s?: string };
 type Zoom = { src: string; label: string; cand?: number } | null;
@@ -37,6 +47,7 @@ function matches(f: Filter, e?: Entry) {
 }
 
 export default function PickPage() {
+  const [lane, setLane] = useState<Lane>("main");
   const [birds, setBirds] = useState<Record<string, Bird>>({});
   const [man, setMan] = useState<Manifest>({ meta: null, species: {} });
   const [state, setState] = useState<State>({});
@@ -56,16 +67,33 @@ export default function PickPage() {
 
   useEffect(() => {
     try { setWho(localStorage.getItem("fb_review_who") || ""); } catch { /* private mode */ }
+    const l: Lane = new URLSearchParams(window.location.search).get("lane") === "female" ? "female" : "main";
+    setLane(l);
     Promise.all([
       fetch("/review-birds.json").then((r) => r.json()).catch(() => []),
-      fetch("/api/candidates", { cache: "no-store" }).then((r) => r.json()).catch(() => ({ meta: null, species: {} })),
+      fetch("/dimorphic.json").then((r) => r.json()).catch(() => []),
+      fetch(`/api/candidates${l === "female" ? "?lane=female" : ""}`, { cache: "no-store" }).then((r) => r.json()).catch(() => ({ meta: null, species: {} })),
       fetch("/api/review", { cache: "no-store" }).then((r) => r.json()).then((d) => d.state || {}).catch(() => ({})),
-    ]).then(([b, m, s]) => {
+    ]).then(([b, dm, m, s]) => {
       const map: Record<string, Bird> = {};
       for (const x of b as Bird[]) map[x.s] = x;
+      for (const x of dm as Bird[]) map[x.s] = { ...(map[x.s] || x), fe: x.fe, fp: x.fp };
       setBirds(map); setMan(m as Manifest); setState(s as State); setReady(true);
     });
   }, []);
+
+  const switchLane = (l: Lane) => {
+    if (l === lane) return;
+    const u = new URL(window.location.href);
+    if (l === "female") u.searchParams.set("lane", "female"); else u.searchParams.delete("lane");
+    window.location.href = u.toString();   // full reload: different manifest + photo source
+  };
+  const vstate = useMemo(() => {
+    if (lane === "main") return state;
+    const out: State = {};
+    for (const k of Object.keys(state)) out[k] = view(state[k], lane)!;
+    return out;
+  }, [state, lane]);
 
   const all = useMemo(() => Object.keys(man.species || {}).filter((s) => (man.species[s] || []).length > 0), [man]);
 
@@ -81,12 +109,12 @@ export default function PickPage() {
     });
     setOrder(list); setIdx(0);
   }, [all, birds]);
-  useEffect(() => { if (ready) rebuild(filter, q, state); }, [ready, filter, q]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (ready) rebuild(filter, q, vstate); }, [ready, filter, q]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const slug = order[idx];
   const bird: Bird | undefined = slug ? birds[slug] || { s: slug, n: slug.replace(/-/g, " ") } : undefined;
   const cands = slug ? man.species[slug] || [] : [];
-  const entry = slug ? state[slug] : undefined;
+  const entry = slug ? vstate[slug] : undefined;
 
   useEffect(() => { setNote(entry?.pickNote || ""); }, [slug, entry?.pickNote]);
 
@@ -95,34 +123,44 @@ export default function PickPage() {
     const look = order.slice(idx, idx + 3).map((s) => birds[s]?.sci).filter((s): s is string => !!s && !requested.current.has(s));
     if (look.length) {
       look.forEach((s) => requested.current.add(s));
-      fetch("/api/refphotos", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ scis: look }) })
-        .then((r) => r.json()).then((d) => setPhotos((p) => ({ ...p, ...(d.photos || {}) })))
+      const female = lane === "female";
+      fetch(female ? "/api/sexphotos" : "/api/refphotos", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ scis: look }) })
+        .then((r) => r.json())
+        .then((d) => {
+          const ph: Record<string, Photo[]> = {};
+          for (const [k, v] of Object.entries(d.photos || {})) ph[k] = female ? ((v as { f?: Photo[] }).f || []) : (v as Photo[]);
+          setPhotos((p) => ({ ...p, ...ph }));
+        })
         .catch(() => look.forEach((s) => requested.current.delete(s)));
     }
     const nx = order[idx + 1];
     if (nx) for (const c of man.species[nx] || []) { const im = new Image(); im.src = c.url; }
-  }, [idx, order, birds, man]);
+  }, [idx, order, birds, man, lane]);
 
   const setWhoPersist = (v: string) => { setWho(v); try { localStorage.setItem("fb_review_who", v); } catch { /* ignore */ } };
 
   const save = useCallback((s: string, patch: { pick?: string | null; pickNote?: string }) => {
+    const F = lane === "female";
+    const P = F ? "fpick" : "pick", N = F ? "fpickNote" : "pickNote", B = F ? "fpickBy" : "pickBy", A = F ? "fpickAt" : "pickAt";
     setState((prev) => {
-      const cur = { ...(prev[s] || {}) };
+      const cur: Record<string, unknown> = { ...(prev[s] || {}) };
       if (patch.pick !== undefined) {
-        if (!patch.pick) { delete cur.pick; delete cur.pickNote; delete cur.pickBy; delete cur.pickAt; }
-        else cur.pick = patch.pick;
+        if (!patch.pick) { delete cur[P]; delete cur[N]; delete cur[B]; delete cur[A]; }
+        else cur[P] = patch.pick;
       }
-      if (patch.pickNote !== undefined) cur.pickNote = patch.pickNote;
-      if (cur.pick) { cur.pickBy = who || cur.pickBy; cur.pickAt = Date.now(); }
-      return { ...prev, [s]: cur };
+      if (patch.pickNote !== undefined) cur[N] = patch.pickNote;
+      if (cur[P]) { cur[B] = who || cur[B]; cur[A] = Date.now(); }
+      return { ...prev, [s]: cur as Entry };
     });
+    const body: Record<string, unknown> = { slug: s, by: who };
+    if (patch.pick !== undefined) body[P] = patch.pick;
+    if (patch.pickNote !== undefined) body[N] = patch.pickNote;
     queue.current = queue.current.then(() =>
       fetch("/api/review", {
-        method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ slug: s, ...patch, by: who }),
+        method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body),
       }).then(() => undefined).catch(() => undefined),
     );
-  }, [who]);
+  }, [who, lane]);
 
   const go = useCallback((d: number) => {
     if (advanceT.current) { clearTimeout(advanceT.current); advanceT.current = null; }
@@ -141,6 +179,10 @@ export default function PickPage() {
     }
   }, [slug, entry?.pick, save, idx, order.length]);
 
+  // Female lane: "keep current" only makes sense when a <slug>-female.png already exists.
+  const canKeep = lane === "main" || !!bird?.fe;
+  const curSrc = bird ? (lane === "main" ? PLATE(bird.s, bird.v) : bird.fe ? PLATE(`${bird.s}-female`) : "") : "";
+
   // Keyboard shortcuts.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -153,7 +195,7 @@ export default function PickPage() {
         if (c) { e.preventDefault(); choose(c.id); }
         return;
       }
-      if (e.key === "k") { e.preventDefault(); choose("current"); }
+      if (e.key === "k") { e.preventDefault(); if (canKeep) choose("current"); }
       else if (e.key === "n") { e.preventDefault(); choose("none"); }
       else if (e.key === "z") {
         e.preventDefault();
@@ -169,13 +211,13 @@ export default function PickPage() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [cands, choose, go, zoom]);
+  }, [cands, choose, go, zoom, canKeep]);
 
   const counts = useMemo(() => {
     let p = 0, c = 0, n = 0;
-    for (const s of all) { const k = kind(state[s]); if (k === "pick") p++; else if (k === "current") c++; else if (k === "none") n++; }
+    for (const s of all) { const k = kind(vstate[s]); if (k === "pick") p++; else if (k === "current") c++; else if (k === "none") n++; }
     return { p, c, n, done: p + c + n, total: all.length };
-  }, [all, state]);
+  }, [all, vstate]);
 
   if (!ready) return <div className="pk"><p style={{ padding: 40 }}>Loading candidates…</p><style jsx global>{css}</style></div>;
 
@@ -186,13 +228,18 @@ export default function PickPage() {
     <div className="pk">
       <header>
         <div className="top">
-          <h1>Pick the best plate</h1>
+          <h1>Pick the best plate{lane === "female" ? " · ♀ female" : ""}</h1>
           <a className="back" href="/review">← Review</a>
         </div>
         <div className="bar"><div className="fill" style={{ width: `${(counts.done / Math.max(1, counts.total)) * 100}%` }} /></div>
         <div className="stats">
           {counts.done} / {counts.total} decided · <b className="ok">{counts.p} picked</b> · {counts.c} kept current · <b className="bad">{counts.n} none close</b>
           {man.meta?.model ? <span className="model"> · {man.meta.model}</span> : null}
+        </div>
+        <div className="lanes">
+          <button className={lane === "main" ? "on" : ""} onClick={() => switchLane("main")}>Main plates</button>
+          <button className={lane === "female" ? "on" : ""} onClick={() => switchLane("female")}>♀ Female lane</button>
+          <a href="/review/sex">M/F labels →</a>
         </div>
         <div className="controls">
           <input className="who" placeholder="your name" value={who} onChange={(e) => setWhoPersist(e.target.value)} />
@@ -218,10 +265,15 @@ export default function PickPage() {
 
           <div className="layout">
             <section className="side">
-              <figure className="current" onClick={() => setZoom({ src: PLATE(bird.s, bird.v), label: "Current shipped plate" })}>
-                <img src={PLATE(bird.s, bird.v)} alt="current plate" onError={(e) => ((e.target as HTMLImageElement).style.opacity = "0.15")} />
-                <figcaption>current</figcaption>
-              </figure>
+              {curSrc ? (
+                <figure className="current" onClick={() => setZoom({ src: curSrc, label: lane === "main" ? "Current shipped plate" : "Current female plate" })}>
+                  <img src={curSrc} alt="current plate" onError={(e) => ((e.target as HTMLImageElement).style.opacity = "0.15")} />
+                  <figcaption>{lane === "main" ? "current" : "current ♀"}</figcaption>
+                </figure>
+              ) : (
+                <figure className="current nocur"><div>no female plate yet</div><figcaption>current ♀</figcaption></figure>
+              )}
+              {lane === "female" && bird.fp && <div className="fp"><b>♀</b> {bird.fp}</div>}
               <div className="refs">
                 {refs === undefined ? <div className="ph">loading photos…</div>
                   : refs.length === 0 ? <div className="ph">no photos</div>
@@ -232,7 +284,7 @@ export default function PickPage() {
                       </figure>
                     ))}
               </div>
-              <div className="refcap">real photos · tap to enlarge</div>
+              <div className="refcap">{lane === "female" ? "real FEMALE photos (iNat sex-annotated)" : "real photos"} · tap to enlarge</div>
             </section>
 
             <section className="cands">
@@ -260,7 +312,7 @@ export default function PickPage() {
 
           <div className="actbar">
             <button className="nav" disabled={idx <= 0} onClick={() => go(-1)}>←</button>
-            <button className={`act${k === "current" ? " on keep" : ""}`} onClick={() => choose("current")}>Keep current <kbd>k</kbd></button>
+            <button className={`act${k === "current" ? " on keep" : ""}`} disabled={!canKeep} onClick={() => choose("current")}>Keep current <kbd>k</kbd></button>
             <button className={`act${k === "none" ? " on none" : ""}`} onClick={() => choose("none")}>None close <kbd>n</kbd></button>
             {k && <button className="act clear" onClick={() => save(bird.s, { pick: null })}>Clear</button>}
             <button className="nav" disabled={idx >= order.length - 1} onClick={() => go(1)}>→</button>
@@ -319,6 +371,13 @@ const css = `
 .pk .current{margin:0;position:relative;cursor:zoom-in;background:#f6f3ea;border:2px dashed #cfc7b4;border-radius:10px}
 .pk .current img{width:100%;aspect-ratio:1/1;object-fit:contain;display:block}
 .pk .current figcaption{position:absolute;top:6px;left:6px;background:#2b2a26;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em}
+.pk .lanes{display:flex;gap:6px;align-items:center;margin:0 0 10px;flex-wrap:wrap}
+.pk .lanes button{padding:6px 12px;border:1px solid #d6d0c3;background:#fff;border-radius:16px;cursor:pointer;font-size:13px}
+.pk .lanes button.on{background:#7a4f6d;color:#fff;border-color:#7a4f6d}
+.pk .lanes a{margin-left:auto;font-size:13px;color:#4f7a3f;text-decoration:none}
+.pk .nocur{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;color:#a49d8c;font-size:13px;cursor:default}
+.pk .fp{font-size:12px;color:#6b665c;line-height:1.35;background:#f6f0f4;border-radius:8px;padding:6px 8px}
+.pk .fp b{color:#7a4f6d}
 .pk .refs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
 .pk .refs figure{margin:0;cursor:zoom-in;min-width:0}
 .pk .refs img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:6px;background:#f0ece1;display:block}

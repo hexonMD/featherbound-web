@@ -34,8 +34,18 @@ export async function POST(req: NextRequest) {
   else if (typeof body.pick === "string" && /^[a-z0-9_-]{1,40}$/i.test(body.pick)) pick = body.pick;
   else pick = undefined;
   const pickNote = typeof body.pickNote === "string" ? body.pickNote.slice(0, 2000) : undefined;
+  // M/F labelling: sex = m|f|s|x, null/"" clears. Female lane pick mirrors pick/pickNote.
+  let sex: "m" | "f" | "s" | "x" | null | undefined;
+  if (body.sex === null || body.sex === "") sex = null;
+  else if (body.sex === "m" || body.sex === "f" || body.sex === "s" || body.sex === "x") sex = body.sex;
+  else sex = undefined;
+  let fpick: string | null | undefined;
+  if (body.fpick === null || body.fpick === "") fpick = null;
+  else if (typeof body.fpick === "string" && /^[a-z0-9_-]{1,40}$/i.test(body.fpick)) fpick = body.fpick;
+  else fpick = undefined;
+  const fpickNote = typeof body.fpickNote === "string" ? body.fpickNote.slice(0, 2000) : undefined;
   try {
-    const entry = await setReviewEntry(slug, { status, note, by, source, pick, pickNote });
+    const entry = await setReviewEntry(slug, { status, note, by, source, pick, pickNote, sex, fpick, fpickNote });
     return NextResponse.json({ ok: true, entry });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
