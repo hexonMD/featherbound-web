@@ -223,7 +223,7 @@ export default function ReviewPage() {
   return (
     <div className="wrap">
       <header>
-        <h1>Plate Review</h1>
+        <h1>Plate Review <a href="/review/pick" style={{ fontSize: 14, fontFamily: "inherit", color: "#4f7a3f", marginLeft: 10 }}>Pick mode →</a></h1>
         <p className="sub">Each bird’s illustration next to real reference photos — confirm the plate depicts the right species. {counts.total.toLocaleString()} species in the current app. Shared with Winnie &amp; Owen.</p>
         <div className="bar">
           <div className="fill" style={{ width: `${(counts.done / Math.max(1, counts.total)) * 100}%` }} />

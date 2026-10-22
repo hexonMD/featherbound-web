@@ -9,8 +9,13 @@ const KEY = "plate-review/state.json";
 export type ReviewStatus = "checked" | "failed";
 // `source` = a reviewer-picked reference image URL (an Audubon plate, an iNat photo, or a pasted URL)
 // to redraw the plate from; `srcAt` = when it was picked. The GPU-side regen consumer reads these.
+// Pick mode (/review/pick): `pick` = a candidate id from plate-candidates/manifest.json, or "current"
+// (keep the shipped plate) or "none" (no candidate is close; `pickNote` says why). Kept separate from
+// status/note/by/at so the main review tab's behaviour is unchanged.
+export type PickValue = string; // candidate id | "current" | "none"
 export type ReviewEntry = {
   status?: ReviewStatus; note?: string; by?: string; at?: number; source?: string; srcAt?: number;
+  pick?: PickValue; pickNote?: string; pickBy?: string; pickAt?: number;
 };
 export type ReviewState = Record<string, ReviewEntry>;
 
@@ -52,10 +57,23 @@ export async function getReviewState(): Promise<ReviewState> {
 
 export async function setReviewEntry(
   slug: string,
-  patch: { status?: ReviewStatus | null; note?: string; by?: string; source?: string | null },
+  patch: {
+    status?: ReviewStatus | null; note?: string; by?: string; source?: string | null;
+    pick?: PickValue | null; pickNote?: string;
+  },
 ): Promise<ReviewEntry | null> {
   const state = await getReviewState();
   const next: ReviewEntry = { ...(state[slug] || {}) };
+  const isPick = patch.pick !== undefined || patch.pickNote !== undefined;
+  if (patch.pick !== undefined) {
+    if (!patch.pick) { delete next.pick; delete next.pickNote; delete next.pickBy; delete next.pickAt; }
+    else next.pick = patch.pick.slice(0, 40);
+  }
+  if (patch.pickNote !== undefined) next.pickNote = patch.pickNote || undefined;
+  if (isPick && next.pick) {
+    if (patch.by) next.pickBy = patch.by;
+    next.pickAt = Date.now();
+  }
   if (patch.status !== undefined) {
     if (patch.status === null) delete next.status;
     else next.status = patch.status;
@@ -65,9 +83,12 @@ export async function setReviewEntry(
     if (!patch.source) { delete next.source; delete next.srcAt; }
     else { next.source = patch.source.slice(0, 1000); next.srcAt = Date.now(); }
   }
-  if (patch.by) next.by = patch.by;
-  next.at = Date.now();
-  if (!next.status && !next.note && !next.source) delete state[slug];
+  const isReview = patch.status !== undefined || patch.note !== undefined || patch.source !== undefined;
+  if (isReview || !isPick) {
+    if (patch.by) next.by = patch.by;
+    next.at = Date.now();
+  }
+  if (!next.status && !next.note && !next.source && !next.pick && !next.pickNote) delete state[slug];
   else state[slug] = next;
 
   const body = new TextEncoder().encode(JSON.stringify(state));
